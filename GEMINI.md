@@ -1,0 +1,3 @@
+# ATTENTION
+
+See ./AGENTS.md
