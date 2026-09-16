@@ -1,0 +1,97 @@
+<Solution>
+  <Folder Name="/BuildingBlocks/" />
+  <Folder Name="/BuildingBlocks/Application/">
+    <Project Path="BuildingBlocks/Application/Rudoger.BuildingBlocks.Application.csproj" />
+  </Folder>
+  <Folder Name="/BuildingBlocks/Domain/">
+    <Project Path="BuildingBlocks/Domain/Rudoger.BuildingBlocks.Domain.csproj" />
+  </Folder>
+  <Folder Name="/BuildingBlocks/Infrastructure/">
+    <Project Path="BuildingBlocks/Infrastructure/Rudoger.BuildingBlocks.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/BuildingBlocks/Presentation/">
+    <Project Path="BuildingBlocks/Presentation/Rudoger.BuildingBlocks.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/Host/">
+    <Project Path="Host/Rudoger.Api/Rudoger.Api.csproj" />
+  </Folder>
+  <Folder Name="/Modules/" />
+  <Folder Name="/Modules/Authn/" />
+  <Folder Name="/Modules/Authn/Application/">
+    <Project Path="Modules/Authn/Application/Rudoger.Modules.Authn.Application.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Authn/Domain/">
+    <Project Path="Modules/Authn/Domain/Rudoger.Modules.Authn.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Authn/Infrastructure/">
+    <Project Path="Modules/Authn/Infrastructure/Rudoger.Modules.Authn.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Authn/Presentation/">
+    <Project Path="Modules/Authn/Presentation/Rudoger.Modules.Authn.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Inventory/" />
+  <Folder Name="/Modules/Inventory/Application/">
+    <Project Path="Modules/Inventory/Application/Rudoger.Modules.Inventory.Application.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Inventory/Domain/">
+    <Project Path="Modules/Inventory/Domain/Rudoger.Modules.Inventory.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Inventory/Infrastructure/">
+    <Project Path="Modules/Inventory/Infrastructure/Rudoger.Modules.Inventory.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Inventory/Presentation/">
+    <Project Path="Modules/Inventory/Presentation/Rudoger.Modules.Inventory.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Logging/" />
+  <Folder Name="/Modules/Logging/Application/">
+    <Project Path="Modules/Logging/Application/Rudoger.Modules.Logging.Application.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Logging/Domain/">
+    <Project Path="Modules/Logging/Domain/Rudoger.Modules.Logging.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Logging/Infrastructure/">
+    <Project Path="Modules/Logging/Infrastructure/Rudoger.Modules.Logging.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Logging/Presentation/">
+    <Project Path="Modules/Logging/Presentation/Rudoger.Modules.Logging.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Order/" />
+  <Folder Name="/Modules/Order/Application/">
+    <Project Path="Modules/Order/Application/Rudoger.Modules.Order.Application.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Order/Domain/">
+    <Project Path="Modules/Order/Domain/Rudoger.Modules.Order.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Order/Infrastructure/">
+    <Project Path="Modules/Order/Infrastructure/Rudoger.Modules.Order.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Order/Presentation/">
+    <Project Path="Modules/Order/Presentation/Rudoger.Modules.Order.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Product/" />
+  <Folder Name="/Modules/Product/Application/">
+    <Project Path="Modules/Product/Application/Rudoger.Modules.Product.Application.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Product/Domain/">
+    <Project Path="Modules/Product/Domain/Rudoger.Modules.Product.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Product/Infrastructure/">
+    <Project Path="Modules/Product/Infrastructure/Rudoger.Modules.Product.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Modules/Product/Presentation/">
+    <Project Path="Modules/Product/Presentation/Rudoger.Modules.Product.Presentation.csproj" />
+  </Folder>
+  <Folder Name="/Tests/" />
+  <Folder Name="/Tests/Architecture/">
+    <Project Path="Tests/Architecture/Rudoger.ArchitectureTests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/EndToEnd/">
+    <Project Path="Tests/EndToEnd/Rudoger.EndToEndTests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Integration/">
+    <Project Path="Tests/Integration/Rudoger.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/Tests/Unit/">
+    <Project Path="Tests/Unit/Rudoger.UnitTests.csproj" />
+  </Folder>
+</Solution>

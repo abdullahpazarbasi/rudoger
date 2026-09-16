@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tooling contracts
+        shell: bash
+        env:
+          ConnectionStrings__Rudoger: Server=mssql,1433;Database=Rudoger;User Id=sa;Password=Rudoger_CI_Only_Strong_Password_123!;TrustServerCertificate=True;Encrypt=True
+          MSSQL_PORT: 15433
+          MSSQL_SA_PASSWORD: Rudoger_CI_Only_Strong_Password_123!
+          Jwt__Secret: Rudoger_CI_Only_Jwt_Secret_At_Least_32_Characters
+        run: |
+          bash -n scripts/*.sh
+          expected='Server=localhost,15433;Database=Rudoger;User Id=sa;Password=Rudoger_CI_Only_Strong_Password_123!;TrustServerCertificate=True;Encrypt=True'
+          test "$(./scripts/db-connection-string.sh)" = "$expected"
+          test "$(pwsh -NoLogo -NoProfile -File scripts/db-connection-string.ps1)" = "$expected"
+          pwsh -NoLogo -NoProfile -Command 'Get-ChildItem scripts/*.ps1 | ForEach-Object { [scriptblock]::Create((Get-Content -Raw $_.FullName)) > $null }'
+          docker compose --project-directory . --env-file .env config --quiet
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            Directory.Packages.props
+            dotnet-tools.json
+      - name: Restore
+        run: dotnet restore Rudoger.slnx
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Build
+        run: dotnet build Rudoger.slnx --configuration Release --no-restore
+      - name: Format
+        run: dotnet format Rudoger.slnx --verify-no-changes --no-restore
+      - name: Unit tests and coverage
+        run: >-
+          dotnet test Tests/Unit/Rudoger.UnitTests.csproj
+          --configuration Release
+          --no-build
+          --settings coverage.runsettings
+          --collect "XPlat Code Coverage"
+          --results-directory TestResults/UnitCoverage
+      - name: Verify coverage threshold
+        run: >-
+          dotnet reportgenerator
+          "-reports:TestResults/UnitCoverage/**/coverage.cobertura.xml"
+          -targetdir:TestResults/UnitCoverageReport
+          -reporttypes:TextSummary
+          minimumCoverageThresholds:lineCoverage=95
+      - name: Coverage summary
+        run: cat TestResults/UnitCoverageReport/Summary.txt
+      - name: Architecture tests
+        run: dotnet test Tests/Architecture/Rudoger.ArchitectureTests.csproj --configuration Release --no-build
+      - name: Integration tests
+        run: dotnet test Tests/Integration/Rudoger.IntegrationTests.csproj --configuration Release --no-build
+      - name: End-to-end tests
+        run: dotnet test Tests/EndToEnd/Rudoger.EndToEndTests.csproj --configuration Release --no-build
+      - name: Container image
+        run: docker build --tag rudoger-api:ci .
+      - name: Compose Swagger UI
+        shell: bash
+        env:
+          MSSQL_SA_PASSWORD: Rudoger_CI_Only_Strong_Password_123!
+          Jwt__Secret: Rudoger_CI_Only_Jwt_Secret_At_Least_32_Characters
+        run: |
+          cleanup() {
+            docker compose --project-directory . --env-file .env down --volumes
+          }
+          trap cleanup EXIT
+          docker compose --project-directory . --env-file .env up --build --detach
+          curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-all-errors \
+            http://localhost:8081/docs/ | grep --fixed-strings '<title>Swagger UI</title>'
+          curl --fail --silent --show-error \
+            http://localhost:8081/openapi/v1.json \
+            | jq --exit-status '.paths | length > 0'

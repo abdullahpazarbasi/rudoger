@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp",
+    "editorconfig.editorconfig",
+    "redhat.vscode-xml",
+    "ms-mssql.mssql",
+    "ms-azuretools.vscode-containers",
+    "ms-azuretools.vscode-docker",
+    "humao.rest-client",
+    "mikestead.dotenv",
+    "esbenp.prettier-vscode",
+    "github.vscode-github-actions"
+  ]
+}

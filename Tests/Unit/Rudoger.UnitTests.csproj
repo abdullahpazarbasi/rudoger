@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../BuildingBlocks/Domain/Rudoger.BuildingBlocks.Domain.csproj" />
+    <ProjectReference Include="../../BuildingBlocks/Application/Rudoger.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="../../BuildingBlocks/Infrastructure/Rudoger.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Authn/Domain/Rudoger.Modules.Authn.Domain.csproj" />
+    <ProjectReference Include="../../Modules/Authn/Application/Rudoger.Modules.Authn.Application.csproj" />
+    <ProjectReference Include="../../Modules/Product/Domain/Rudoger.Modules.Product.Domain.csproj" />
+    <ProjectReference Include="../../Modules/Product/Application/Rudoger.Modules.Product.Application.csproj" />
+    <ProjectReference Include="../../Modules/Inventory/Domain/Rudoger.Modules.Inventory.Domain.csproj" />
+    <ProjectReference Include="../../Modules/Inventory/Application/Rudoger.Modules.Inventory.Application.csproj" />
+    <ProjectReference Include="../../Modules/Order/Domain/Rudoger.Modules.Order.Domain.csproj" />
+    <ProjectReference Include="../../Modules/Order/Application/Rudoger.Modules.Order.Application.csproj" />
+    <ProjectReference Include="../../Modules/Logging/Application/Rudoger.Modules.Logging.Application.csproj" />
+    <ProjectReference Include="../../Modules/Logging/Presentation/Rudoger.Modules.Logging.Presentation.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+</Project>

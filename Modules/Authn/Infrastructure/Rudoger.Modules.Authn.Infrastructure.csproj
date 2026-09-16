@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Application/Rudoger.Modules.Authn.Application.csproj" />
+    <ProjectReference Include="../Domain/Rudoger.Modules.Authn.Domain.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Infrastructure/Rudoger.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+  </ItemGroup>
+</Project>

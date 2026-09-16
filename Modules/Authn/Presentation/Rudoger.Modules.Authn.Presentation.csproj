@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Application/Rudoger.Modules.Authn.Application.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Presentation/Rudoger.BuildingBlocks.Presentation.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Domain/Rudoger.Modules.Product.Domain.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Application/Rudoger.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+</Project>

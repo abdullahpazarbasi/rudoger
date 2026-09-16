@@ -8,7 +8,17 @@
     "*.yml.dist": "yaml",
     "*.yaml.dist": "yaml",
     "*.gs": "javascript",
-    "package-lock.json": "plaintext"
+    "package-lock.json": "plaintext",
+    "*.csproj": "xml",
+    "*.props": "xml",
+    "*.targets": "xml",
+    "*.slnx": "xml",
+    "*.runsettings": "xml",
+    "*.ruleset": "xml",
+    "nuget.config": "xml",
+    "global.json": "jsonc",
+    "dotnet-tools.json": "jsonc",
+    "launchSettings.json": "jsonc"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.detectIndentation": false,
@@ -26,6 +36,21 @@
   "files.insertFinalNewline": false,
   "files.trimTrailingWhitespace": true,
   "files.eol": "\n",
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/TestResults": true
+  },
+  "search.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/TestResults": true
+  },
+  "files.watcherExclude": {
+    "**/bin/**": true,
+    "**/obj/**": true,
+    "**/TestResults/**": true
+  },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.tabSize": 2,
@@ -48,7 +73,7 @@
     "files.insertFinalNewline": true
   },
   "[xml]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "redhat.vscode-xml",
     "editor.tabSize": 2,
     "editor.indentSize": 2,
     "editor.insertSpaces": true,
@@ -104,11 +129,14 @@
     "files.insertFinalNewline": true
   },
   "[csharp]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
     "editor.tabSize": 4,
     "editor.indentSize": 4,
     "editor.insertSpaces": true,
-    "files.insertFinalNewline": true
+    "files.insertFinalNewline": true,
+    "editor.codeActionsOnSave": {
+      "source.addMissingImports": "explicit"
+    }
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -138,9 +166,45 @@
     "editor.insertSpaces": true,
     "files.insertFinalNewline": true
   },
+  "dotnet.defaultSolution": "Rudoger.slnx",
+  "dotnet.server.useOmnisharp": false,
+  "dotnet.preferCSharpExtension": false,
+  "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
+  "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
+  "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+  "dotnet.completion.showNameCompletionSuggestions": true,
+  "dotnet.codeLens.enableReferencesCodeLens": true,
+  "dotnet.codeLens.enableTestsCodeLens": true,
+  "dotnet.navigation.navigateToDecompiledSources": true,
+  "dotnet.symbolSearch.searchReferenceAssemblies": false,
+  "dotnet.unitTests.runSettingsPath": "coverage.runsettings",
+  "dotnet.inlayHints.enableInlayHintsForParameters": true,
+  "dotnet.inlayHints.enableInlayHintsForLiteralParameters": true,
+  "dotnet.inlayHints.enableInlayHintsForIndexerParameters": true,
+  "dotnet.inlayHints.enableInlayHintsForObjectCreationParameters": true,
+  "dotnet.inlayHints.enableInlayHintsForOtherParameters": true,
+  "dotnet.inlayHints.suppressInlayHintsForParametersThatDifferOnlyBySuffix": true,
+  "dotnet.inlayHints.suppressInlayHintsForParametersThatMatchMethodIntent": true,
+  "dotnet.inlayHints.suppressInlayHintsForParametersThatMatchArgumentName": true,
+  "csharp.format.enable": true,
+  "csharp.semanticHighlighting.enabled": true,
+  "csharp.maxProjectFileCountForDiagnosticAnalysis": -1,
+  "csharp.suppressBuildAssetsNotification": true,
+  "csharp.inlayHints.enableInlayHintsForImplicitObjectCreation": true,
+  "csharp.inlayHints.enableInlayHintsForImplicitVariableTypes": true,
+  "csharp.inlayHints.enableInlayHintsForLambdaParameterTypes": true,
+  "xml.format.enabled": true,
+  "xml.format.splitAttributes": "preserve",
+  "xml.format.preserveAttributeLineBreaks": true,
+  "xml.format.joinContentLines": false,
   "makefile.configureOnOpen": false,
   "prettier.requireConfig": true,
   "eslint.format.enable": true,
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
   "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

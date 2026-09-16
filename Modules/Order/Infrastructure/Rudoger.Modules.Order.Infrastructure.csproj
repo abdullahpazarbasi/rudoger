@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Application/Rudoger.Modules.Order.Application.csproj" />
+    <ProjectReference Include="../Domain/Rudoger.Modules.Order.Domain.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Infrastructure/Rudoger.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="../../Inventory/Presentation/Rudoger.Modules.Inventory.Presentation.csproj" />
+    <ProjectReference Include="../../Product/Presentation/Rudoger.Modules.Product.Presentation.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+  </ItemGroup>
+</Project>

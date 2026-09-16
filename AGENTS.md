@@ -90,14 +90,14 @@ StockMovement:
 - CorrelationId
 - SourceEventId
 
-| Type | OnHand delta | Reserved delta |
-| :--- | ---: | ---: |
-| `RECEIPT` | `+quantity` | `0` |
-| `ADJUSTMENT` | `±quantity` | `0` |
-| `DEDUCTION` | `-quantity` | `0` |
-| `RESERVED` | `0` | `+quantity` |
-| `COMMITTED` | `-quantity` | `-quantity` |
-| `RELEASED` | `0` | `-quantity` |
+| Type         | OnHand delta | Reserved delta |
+| :----------- | -----------: | -------------: |
+| `RECEIPT`    |  `+quantity` |            `0` |
+| `ADJUSTMENT` |  `±quantity` |            `0` |
+| `DEDUCTION`  |  `-quantity` |            `0` |
+| `RESERVED`   |          `0` |    `+quantity` |
+| `COMMITTED`  |  `-quantity` |    `-quantity` |
+| `RELEASED`   |          `0` |    `-quantity` |
 
 ### Sipariş Yönetimi
 
@@ -175,29 +175,28 @@ OrderLine (child model):
 - Separation of Concerns
 - DDD
 - Workaround'lardan ve hack'lerden uzak durulacak. Varsayılan olarak best-practice'ler takip edilecek
-- authn ayrı BC, product ayrı BC, inventory ayrı BC, order ayrı BC'dir
+- authn, product, inventory, order ve logging ayrı BC'lerdir
 - BC'ler (Bounded Context'ler) arası etkileşimler yalnızca dahili API etkileşimleri üzerinden mümkün olur
 - X-Correlation-Id takibi (internal API taleplerinde de propagate edilecek ve hata raporlarında da bulunacak)
 - Entity ID tipi varsayılan olarak GUID v7
 - CQS/CQRS (özgür)
-- Event Sourcing (projection in the same transaction)
-- Her BC'nin kendi event store'u jenerik olacak (CLR tipi değil) ve snapshot ile upcasting kapsam dışı
+- İş BC'lerinde Event Sourcing (projection in the same transaction)
+- Her iş BC'sinin kendi event store'u jenerik olacak (CLR tipi değil) ve snapshot ile upcasting kapsam dışı
 - Event envelope alanları: EventId, StreamId, AggregateType, Version, EventType, SchemaVersion, Payload, Metadata, OccurredAtUtc
 - Event unique constraint: (StreamId, Version)
 - OOP
 - Her class/record/enum/interface ayrı dosyada
-- Genel unit test line coverage'ı %95+
+- Domain unit test line coverage'ı %95+
 - Clean Architecture (katmanlar dizinlere kuralı da uygulanacak)
 - Modül başına ayrı csproj'lar: `Modules/{Authn,Product,Inventory,Order,Logging}/{Domain,Application,Infrastructure,Presentation}` + `Host/Rudoger.Api`
 - Katmanlar arası sızma asla kabul edilemez (özel test çalıştırılır)
 - Tek veritabanı ama BC başına ayrı veritabanı şeması ve şemalar arası FK yok (authn, product, inventory, order, logging)
-- Dummy veritabanı tabloları (iş kurallarına ilişkin özellik taşımaz) (PK, BC içi FK, `NOT NULL` alanlar, index'ler, unique index'leri, azami alan uzunluğu tanımları bulunabilir)
 - Patch için RFC 6902 benimsenir
 - API end-point resource path'leri `/api/v1/{domain}/{collection}/{item}/{collection}/{item}` naming convention'ına göre belirlenir
 - Race condition'da event version esas alınacak
 - GitHub Actions ile CI
 - Hata raporlama standardı RFC 9457
-- Docker container'ları: mssql + api
+- Docker container'ları: mssql + migrate + seed + api
 - DotEnv: .env + .env.local + .env.dist
 
 ## Internal API ne demek?
@@ -207,5 +206,5 @@ Bir istemci BC'nin infrastructure'ındaki bir gateway istemcisinden bir sunucu B
 ## Geliştirme Kuralları
 
 - Stage'e almak ve commit'lemek yasak
-- Senin (agent) kullanıcın ile iletişimin Türkçe olmalı. Diğer her şey İngilizce
+- Senin (agent) kullanıcın ile iletişimin Türkçe olmalı. `README.md` ve `docs/` altındaki belgeler de Türkçe yazılır (kod tanımlayıcıları, yollar ve uç nokta adları İngilizce kalır). Diğer her şey (kod, yorumlar, commit mesajları, testler, yapılandırma) İngilizce
 - **Definition of Done**: Her davranış değişikliği uygun automated test ile kapsanır; Mimari, sızmalara karşı teftiş ve tamir edilecek; test line coverage oranı tutturulacak; dotnet format temiz çıkacak
