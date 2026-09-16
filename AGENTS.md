@@ -10,8 +10,9 @@
 
 ## Proje Ekleri
 
-- **DICTIONARY.md** : Ubiquitous language için güncel tutulması gereken sözlüktür.
-- **README.md** : Projeyi değerlendirecek otorite için güncel tutulması gereken yol göstericidir.
+- [**DICTIONARY.md**](./DICTIONARY.md) : Ubiquitous language için güncel tutulması gereken sözlüktür.
+- [**docs/architecture/ARCHITECTURE.md**](./docs/architecture/ARCHITECTURE.md) : Proje mimarisini diyagramlarla açıklar.
+- [**README.md**](./README.md) : Projeyi değerlendirecek otorite için güncel tutulması gereken yol göstericidir.
 
 ## Uygulama Özellikleri
 
@@ -22,11 +23,11 @@
 
 Ürünü;
 
-- Tekil ekleme (POST)
-- Listeleme (GET)
-- Tekil görüntüleme (GET)
-- Tekil yamama (PATCH)
-- Tekil silme (DELETE)
+- Tekil ekleme (`POST`)
+- Listeleme (`GET`)
+- Tekil görüntüleme (`GET`)
+- Tekil yamama (`PATCH`)
+- Tekil silme (`DELETE`)
 
 **Önemli Kural:** Ürün ile level 0 ürün paketleme bir girilir
 **Önemli Kural:** Stoku ve/veya herhangi statüde siparişi bulunan ürün silinemez (409)
@@ -61,7 +62,7 @@ Product Packaging (child model):
 - Ürün bazında stok girişi
 - Stok miktarı sorgulama
 - Stok miktarı receipt/adjustment/deduction
-- Reserved/Committed/Released
+- `RESERVED` | `COMMITTED` | `RELEASED`
 
 **Önemli Varsayım:** Stoklamada bir kapasite sınırı bulunmadığı varsayıldı
 **Önemli Varsayım:** Tekil warehouse varsayıldı
@@ -118,7 +119,7 @@ Order:
 
 - Id
 - OrderNumber
-- Status (PLACED|SHIPPED|CANCELLED)
+- Status (`PLACED` | `SHIPPED` | `CANCELLED`)
 - UserId (JWT:sub)
 
 OrderLine (child model):
@@ -139,9 +140,9 @@ OrderLine (child model):
 - JWT kullanılır
 - Refresh Token biliçli olarak kapsam dışı
 - Varsayılan kullanıcılar ve şifreleri (seed ile oluşturulur):
-  - abdullah:12345678
-  - murat:12345678
-  - gokhan:12345678
+  - `abdullah`:`12345678`
+  - `murat`:`12345678`
+  - `gokhan`:`12345678`
 
 ### API İstek Kaydı
 
@@ -157,7 +158,7 @@ OrderLine (child model):
 - API end-point'leri RESTful tasarlanır
 - Containerization by Docker
 - OpenAPI
-- .editorconfig
+- `.editorconfig`
 
 ## Değerlendirme Kriterleri
 
@@ -191,13 +192,13 @@ OrderLine (child model):
 - Modül başına ayrı csproj'lar: `Modules/{Authn,Product,Inventory,Order,Logging}/{Domain,Application,Infrastructure,Presentation}` + `Host/Rudoger.Api`
 - Katmanlar arası sızma asla kabul edilemez (özel test çalıştırılır)
 - Tek veritabanı ama BC başına ayrı veritabanı şeması ve şemalar arası FK yok (authn, product, inventory, order, logging)
-- Patch için RFC 6902 benimsenir
+- Patch için `RFC 6902` benimsenir
 - API end-point resource path'leri `/api/v1/{domain}/{collection}/{item}/{collection}/{item}` naming convention'ına göre belirlenir
 - Race condition'da event version esas alınacak
 - GitHub Actions ile CI
-- Hata raporlama standardı RFC 9457
-- Docker container'ları: mssql + migrate + seed + api
-- DotEnv: .env + .env.local + .env.dist
+- Hata raporlama standardı `RFC 9457`
+- Docker container'ları: `mssql` + `migrate` + `seed` + `api` + `swagger`
+- DotEnv: `.env` + `.env.local` + `.env.dist`
 
 ## Internal API ne demek?
 
@@ -207,4 +208,8 @@ Bir istemci BC'nin infrastructure'ındaki bir gateway istemcisinden bir sunucu B
 
 - Stage'e almak ve commit'lemek yasak
 - Senin (agent) kullanıcın ile iletişimin Türkçe olmalı. `README.md` ve `docs/` altındaki belgeler de Türkçe yazılır (kod tanımlayıcıları, yollar ve uç nokta adları İngilizce kalır). Diğer her şey (kod, yorumlar, commit mesajları, testler, yapılandırma) İngilizce
-- **Definition of Done**: Her davranış değişikliği uygun automated test ile kapsanır; Mimari, sızmalara karşı teftiş ve tamir edilecek; test line coverage oranı tutturulacak; dotnet format temiz çıkacak
+- **Definition of Done:**
+  - Her davranış değişikliği uygun `automated test` ile kapsanır
+  - Mimari, sızmalara karşı teftiş ve tamir edilir
+  - `Line coverage` hedefi tutturulmalıdır
+  - `dotnet format` temiz çıkmalıdır

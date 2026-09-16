@@ -82,7 +82,7 @@ Linux/macOS Bash:
 ./scripts/db-connection-string.sh
 ```
 
-Betik, yapılandırma önceliğine göre `.env` ve `.env.local` dosyalarını ve süreç ortamını okur; Compose içi sunucu adını host için `localhost` ve `MSSQL_PORT` değerine dönüştürür. Çıktı parolayı içerdiğinden log veya issue içeriğine eklemeyin.
+Betik, yapılandırma önceliğine göre [.env](./.env) ve [.env.local](./.env.local) dosyalarını ve süreç ortamını okur; Compose içi sunucu adını host için `localhost` ve `MSSQL_PORT` değerine dönüştürür. Çıktı parolayı içerdiğinden log veya issue içeriğine eklemeyin.
 
 ## Veritabanı yaşam döngüsü
 
@@ -104,7 +104,7 @@ Linux/macOS Bash:
 
 İki komut da idempotent'tır. Seed komutu eksik varsayılan kullanıcıları oluşturur, mevcut kullanıcıların kimlik bilgilerini değiştirmez.
 
-Host SDK tabanlı geliştirme için .NET SDK 10.0.112'yi veya `global.json` içinde sabitlenmiş uyumlu sürümü kullanın:
+Host SDK tabanlı geliştirme için .NET SDK 10.0.112'yi veya [global.json](./global.json) içinde sabitlenmiş uyumlu sürümü kullanın:
 
 Windows PowerShell:
 
@@ -142,7 +142,7 @@ Linux/macOS Bash:
 
 ## Yapılandırma
 
-Yapılandırma önceliği `appsettings.json` → `.env` → `.env.local` → süreç ortamı → komut satırı şeklindedir. `.env.local` Git tarafından yok sayılır.
+Yapılandırma önceliği `appsettings.json` → [.env](./.env) → [.env.local](./.env.local) → süreç ortamı → komut satırı şeklindedir. `.env.local` Git tarafından yok sayılır.
 
 Zorunlu secret'lar:
 
@@ -184,7 +184,7 @@ Yeniden denenebilir oluşturma/hareket komutları `Idempotency-Key` ister. Aynı
 
 Sipariş oluşturma ve durum geçişleri, `Location` header'ıyla birlikte HTTP 202 döndürür. İlgili süreç kaynağını `Succeeded` veya `Failed` durumuna gelene kadar sorgulayın. Birim fiyatlar sunucu tarafında snapshot olarak alınır: temel fiyat, seçilen packaging'in conversion factor değeriyle çarpılır. Stok her zaman base UoM cinsinden tutulur. Başarılı sipariş oluşturma stoku reserve eder; sevkiyat commit, iptal ise release eder.
 
-Çalıştırılabilir bir istek akışı [`Rudoger.http`](Rudoger.http) içinde bulunur.
+Çalıştırılabilir bir istek akışı [`Rudoger.http`](./Rudoger.http) içinde bulunur.
 
 ## Mimari
 
@@ -204,7 +204,7 @@ Bağımlılıklar iç katmanlara yönelir. Context'ler arası çağrılara yaln�
 
 Authn, Product, Inventory ve Order; jenerik JSON event envelope'larını saklar ve read projection'larını aynı yerel transaction içinde günceller. Her biri kendi `Events` tablosuna sahiptir ve yarış durumlarını unique `(StreamId, Version)` kısıtıyla çözer. Logging, sıradan ve yalnızca sona ekleme yapılan operasyonel bir tablodur. Beş context tek veritabanını paylaşır ancak ayrı şemalara sahiptir ve şemalar arası foreign key kullanmaz.
 
-Order ve Inventory outbox worker'ları, iş akışlarını en az bir kez yürütür. Unique idempotency/source event ID'leri yeniden oynatmayı güvenli kılar. Karar kayıtları için [`docs/architecture`](docs/architecture) dizinine bakın.
+Order ve Inventory outbox worker'ları, iş akışlarını en az bir kez yürütür. Unique idempotency/source event ID'leri yeniden oynatmayı güvenli kılar. Karar kayıtları için [`docs/architecture`](./docs/architecture) dizinine bakın.
 
 ## Doğrulama
 
@@ -248,6 +248,6 @@ dotnet test Tests/Integration/Rudoger.IntegrationTests.csproj
 dotnet test Tests/EndToEnd/Rudoger.EndToEndTests.csproj
 ```
 
-Unit test coverage kapısı tüm Domain assembly'leri için %95 line coverage ister; eşik, `dotnet-tools.json` ile sabitlenen [ReportGenerator](https://github.com/danielpalme/ReportGenerator) yerel aracının `minimumCoverageThresholds` ayarıyla uygulanır ve özet raporu `TestResults/UnitCoverageReport/Summary.txt` dosyasına yazılır. Güncel Release ölçümü %99,1'dir. Application, kalıcılık, migration, JWT, middleware, dahili API, outbox worker ve Product → Inventory → Order akışının tamamı gerçek bir Testcontainers SQL Server örneğiyle sınanır. Integration ve uçtan uca testler Docker gerektirir.
+Unit test coverage kapısı tüm Domain assembly'leri için %95 line coverage ister; eşik, [dotnet-tools.json](./dotnet-tools.json) ile sabitlenen [ReportGenerator](https://github.com/danielpalme/ReportGenerator) yerel aracının `minimumCoverageThresholds` ayarıyla uygulanır ve özet raporu [TestResults/UnitCoverageReport/Summary.txt](./TestResults/UnitCoverageReport/Summary.txt) dosyasına yazılır. Güncel Release ölçümü %99,1'dir. Application, kalıcılık, migration, JWT, middleware, dahili API, outbox worker ve Product → Inventory → Order akışının tamamı gerçek bir Testcontainers SQL Server örneğiyle sınanır. Integration ve uçtan uca testler Docker gerektirir.
 
 CI; build, format, unit test coverage, mimari, integration, uçtan uca ve production konteyner imajı kontrollerini tekrarlar.
