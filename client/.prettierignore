@@ -1,0 +1,6 @@
+dist/
+coverage/
+node_modules/
+src/api/generated/schema.d.ts
+openapi/rudoger-v1.json
+PLAN.md
