@@ -40,12 +40,13 @@ public sealed class GuardTests
     {
         var conflict = new ConflictException("conflict-code", "Conflict detail");
         var inner = new InvalidOperationException("inner");
-        Guid streamId = Guid.CreateVersion7();
-        var concurrency = new ConcurrencyException(streamId, inner);
+        Guid aggregateId = Guid.CreateVersion7();
+        var concurrency = new ConcurrencyException(aggregateId, inner);
 
         Assert.Equal("conflict-code", conflict.Code);
         Assert.Equal("Conflict detail", conflict.Message);
-        Assert.Equal(streamId, concurrency.StreamId);
+        Assert.Equal(aggregateId, concurrency.AggregateId);
+        Assert.DoesNotContain("Stream", concurrency.Message, StringComparison.Ordinal);
         Assert.Same(inner, concurrency.InnerException);
     }
 }

@@ -14,8 +14,6 @@ public sealed class InventoryRepository(
 {
     private const string AggregateType = "stock-item";
 
-    private Guid CurrentStreamId { get; set; }
-
     public async Task<StockItemAggregate?> LoadAsync(Guid id, CancellationToken cancellationToken)
     {
         IReadOnlyList<IDomainEvent> events = await eventStore.LoadAsync(id, cancellationToken);
@@ -40,7 +38,6 @@ public sealed class InventoryRepository(
 
     public Task SaveAsync(StockItemAggregate aggregate, CancellationToken cancellationToken)
     {
-        CurrentStreamId = aggregate.Id;
         return eventStore.AppendAsync(AggregateType, aggregate, ProjectAsync, cancellationToken);
     }
 
@@ -66,7 +63,11 @@ public sealed class InventoryRepository(
             .SingleOrDefaultAsync(item => item.CreationIdempotencyKey == idempotencyKey, cancellationToken);
         return entity is null
             ? null
-            : new StockItemCreationView(ToView(entity), entity.OpeningQuantity, entity.CreationIdempotencyKey);
+            : new StockItemCreationView(
+                ToView(entity),
+                entity.OpeningUomCode,
+                entity.RequestedOpeningQuantity,
+                entity.CreationIdempotencyKey);
     }
 
     public async Task<Page<StockItemView>> ListAsync(
@@ -106,7 +107,9 @@ public sealed class InventoryRepository(
     {
         if (!await dbContext.StockItems.AsNoTracking().AnyAsync(item => item.Id == stockItemId, cancellationToken))
         {
-            throw new KeyNotFoundException($"Stock item '{stockItemId}' was not found.");
+            throw new NotFoundException(
+                InventoryFailureCode.StockItemNotFound,
+                $"Stock item '{stockItemId}' was not found.");
         }
 
         IQueryable<StockMovementReadEntity> query = dbContext.StockMovements.AsNoTracking()
@@ -121,12 +124,12 @@ public sealed class InventoryRepository(
         return new Page<StockMovementView>(items.Select(ToView).ToArray(), pageNumber, pageSize, totalCount);
     }
 
-    private Task ProjectAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
+    private Task ProjectAsync(Guid aggregateId, IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         return domainEvent switch
         {
             StockItemOpened opened => ProjectOpenedAsync(opened, cancellationToken),
-            IStockMovementEvent movement => ProjectMovementAsync(movement, cancellationToken),
+            IStockMovementEvent movement => ProjectMovementAsync(aggregateId, movement, cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported inventory event '{domainEvent.GetType().Name}'."),
         };
     }
@@ -140,36 +143,45 @@ public sealed class InventoryRepository(
             ProductId = opened.ProductId,
             BaseUomCode = opened.BaseUomCode,
             OpeningQuantity = opened.OpeningQuantity,
+            OpeningUomCode = opened.OpeningUomCode,
+            RequestedOpeningQuantity = opened.RequestedOpeningQuantity,
             CreationIdempotencyKey = opened.IdempotencyKey,
         });
         AddReleaseUsageOutbox(opened.ProductId, opened.ProductUsageOperationId);
         return Task.CompletedTask;
     }
 
-    private async Task ProjectMovementAsync(IStockMovementEvent movementEvent, CancellationToken cancellationToken)
+    private async Task ProjectMovementAsync(
+        Guid aggregateId,
+        IStockMovementEvent movementEvent,
+        CancellationToken cancellationToken)
     {
         StockMovementData movement = movementEvent.Movement;
-        StockItemReadEntity item = dbContext.StockItems.Local.FirstOrDefault(entity => entity.Id == CurrentStreamId)
-            ?? await dbContext.StockItems.SingleAsync(entity => entity.Id == CurrentStreamId, cancellationToken);
+        StockMovementType movementType = ToMovementType(movementEvent);
+        StockItemReadEntity item = dbContext.StockItems.Local
+                .FirstOrDefault(entity => entity.Id == aggregateId)
+            ?? await dbContext.StockItems.SingleAsync(entity => entity.Id == aggregateId, cancellationToken);
         item.OnHandQuantity += movement.OnHandQuantityDelta;
         item.ReservedQuantity += movement.ReservedQuantityDelta;
         dbContext.StockMovements.Add(new StockMovementReadEntity
         {
             Id = movement.MovementId,
-            StockItemId = CurrentStreamId,
-            Type = ToMovementType(movementEvent),
+            StockItemId = aggregateId,
+            Type = movementType,
+            UomCode = movement.UomCode,
+            Quantity = movement.Quantity,
             OnHandQuantityDelta = movement.OnHandQuantityDelta,
             ReservedQuantityDelta = movement.ReservedQuantityDelta,
             ReferenceType = movement.ReferenceType,
             ReferenceId = movement.ReferenceId,
             IdempotencyKey = movement.IdempotencyKey,
             CorrelationId = movement.CorrelationId,
-            SourceEventId = movement.SourceEventId,
+            OperationId = movement.OperationId,
             OccurredAtUtc = timeProvider.GetUtcNow(),
         });
         if (movement.ReferenceType == "MANUAL")
         {
-            AddReleaseUsageOutbox(item.ProductId, movement.SourceEventId);
+            AddReleaseUsageOutbox(item.ProductId, movement.OperationId);
         }
     }
 
@@ -204,13 +216,14 @@ public sealed class InventoryRepository(
             entity.Id,
             entity.StockItemId,
             entity.Type,
+            entity.UomCode,
+            entity.Quantity,
             entity.OnHandQuantityDelta,
             entity.ReservedQuantityDelta,
             entity.ReferenceType,
             entity.ReferenceId,
             entity.IdempotencyKey,
             entity.CorrelationId,
-            entity.SourceEventId,
             entity.OccurredAtUtc);
     }
 

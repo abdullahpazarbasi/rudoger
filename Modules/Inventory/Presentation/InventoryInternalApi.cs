@@ -8,29 +8,29 @@ public sealed class InventoryInternalApi(InventoryInternalService service) : IIn
         Guid productId,
         decimal quantity,
         Guid orderId,
-        Guid sourceEventId,
+        Guid operationId,
         CancellationToken cancellationToken)
     {
-        return service.ReserveAsync(productId, quantity, orderId, sourceEventId, cancellationToken);
+        return service.ReserveAsync(productId, quantity, orderId, operationId, cancellationToken);
     }
 
-    public Task CommitAsync(Guid productId, Guid orderId, Guid sourceEventId, CancellationToken cancellationToken)
+    public Task CommitAsync(Guid productId, Guid orderId, Guid operationId, CancellationToken cancellationToken)
     {
-        return service.CommitAsync(productId, orderId, sourceEventId, cancellationToken);
+        return service.CommitAsync(productId, orderId, operationId, cancellationToken);
     }
 
-    public Task ReleaseAsync(Guid productId, Guid orderId, Guid sourceEventId, CancellationToken cancellationToken)
+    public Task ReleaseAsync(Guid productId, Guid orderId, Guid operationId, CancellationToken cancellationToken)
     {
-        return service.ReleaseAsync(productId, orderId, sourceEventId, cancellationToken);
+        return service.ReleaseAsync(productId, orderId, operationId, cancellationToken);
     }
 
     public Task CompensateReservationAsync(
         Guid productId,
         Guid orderId,
-        Guid sourceEventId,
+        Guid operationId,
         CancellationToken cancellationToken)
     {
-        return service.CompensateReservationAsync(productId, orderId, sourceEventId, cancellationToken);
+        return service.CompensateReservationAsync(productId, orderId, operationId, cancellationToken);
     }
 
     public Task<bool> HasAnyStockAsync(Guid productId, CancellationToken cancellationToken)

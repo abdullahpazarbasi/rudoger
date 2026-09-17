@@ -10,6 +10,10 @@ public sealed class StockMovementReadEntity
 
     public StockMovementType Type { get; set; }
 
+    public string UomCode { get; set; } = string.Empty;
+
+    public decimal Quantity { get; set; }
+
     public decimal OnHandQuantityDelta { get; set; }
 
     public decimal ReservedQuantityDelta { get; set; }
@@ -22,7 +26,7 @@ public sealed class StockMovementReadEntity
 
     public string CorrelationId { get; set; } = string.Empty;
 
-    public Guid SourceEventId { get; set; }
+    public Guid OperationId { get; set; }
 
     public DateTimeOffset OccurredAtUtc { get; set; }
 }

@@ -5,7 +5,7 @@ namespace Rudoger.Modules.Inventory.Domain;
 public sealed class StockItemAggregate : AggregateRoot
 {
     private readonly Dictionary<Guid, decimal> _reservations = [];
-    private readonly HashSet<Guid> _processedSourceEvents = [];
+    private readonly HashSet<Guid> _processedOperations = [];
 
     public Guid ProductId { get; private set; }
 
@@ -24,7 +24,9 @@ public sealed class StockItemAggregate : AggregateRoot
         decimal openingQuantity,
         string idempotencyKey,
         string correlationId,
-        Guid sourceEventId)
+        Guid operationId,
+        string openingUomCode,
+        decimal requestedOpeningQuantity)
     {
         if (stockItemId == Guid.Empty || productId == Guid.Empty)
         {
@@ -42,6 +44,17 @@ public sealed class StockItemAggregate : AggregateRoot
             "stock-idempotency-key-invalid",
             "Idempotency key",
             InventoryRules.IdempotencyKeyMaximumLength);
+        string normalizedOpeningUom = NormalizeUomCode(openingUomCode);
+        Guard.NonNegative(
+            requestedOpeningQuantity,
+            "stock-opening-quantity-invalid",
+            "Opening quantity");
+        if ((openingQuantity == 0) != (requestedOpeningQuantity == 0))
+        {
+            throw new DomainException(
+                "stock-opening-quantity-invalid",
+                "Opening quantity and its base quantity must both be zero or both be positive.");
+        }
 
         var aggregate = new StockItemAggregate();
         aggregate.Raise(new StockItemOpened(
@@ -50,29 +63,59 @@ public sealed class StockItemAggregate : AggregateRoot
             normalizedUom,
             openingQuantity,
             key,
-            sourceEventId));
+            operationId,
+            normalizedOpeningUom,
+            requestedOpeningQuantity));
         if (openingQuantity > 0)
         {
-            aggregate.Receive(openingQuantity, idempotencyKey, correlationId, sourceEventId);
+            aggregate.Receive(
+                openingQuantity,
+                idempotencyKey,
+                correlationId,
+                operationId,
+                normalizedOpeningUom,
+                requestedOpeningQuantity);
         }
 
         return aggregate;
     }
 
-    public void Receive(decimal quantity, string idempotencyKey, string correlationId, Guid sourceEventId)
+    public void Receive(
+        decimal quantity,
+        string idempotencyKey,
+        string correlationId,
+        Guid operationId,
+        string uomCode,
+        decimal requestedQuantity)
     {
-        if (AlreadyProcessed(sourceEventId))
+        if (AlreadyProcessed(operationId))
         {
             return;
         }
 
         Guard.Positive(quantity, "stock-receipt-quantity-invalid", "Receipt quantity");
-        Raise(new StockReceived(CreateMovement(quantity, 0, "MANUAL", null, idempotencyKey, correlationId, sourceEventId)));
+        Guard.Positive(requestedQuantity, "stock-receipt-quantity-invalid", "Receipt quantity");
+        Raise(new StockReceived(CreateMovement(
+            quantity,
+            0,
+            "MANUAL",
+            null,
+            idempotencyKey,
+            correlationId,
+            operationId,
+            uomCode,
+            requestedQuantity)));
     }
 
-    public void Adjust(decimal delta, string idempotencyKey, string correlationId, Guid sourceEventId)
+    public void Adjust(
+        decimal delta,
+        string idempotencyKey,
+        string correlationId,
+        Guid operationId,
+        string uomCode,
+        decimal requestedQuantity)
     {
-        if (AlreadyProcessed(sourceEventId))
+        if (AlreadyProcessed(operationId))
         {
             return;
         }
@@ -81,30 +124,65 @@ public sealed class StockItemAggregate : AggregateRoot
         {
             throw new DomainException("stock-adjustment-quantity-invalid", "Adjustment delta cannot be zero.");
         }
+        if (requestedQuantity == 0)
+        {
+            throw new DomainException("stock-adjustment-quantity-invalid", "Adjustment delta cannot be zero.");
+        }
+        if ((delta > 0) != (requestedQuantity > 0))
+        {
+            throw new DomainException(
+                "stock-adjustment-quantity-invalid",
+                "Adjustment quantity and its base delta must have the same direction.");
+        }
 
         EnsureBalances(OnHandQuantity + delta, ReservedQuantity);
-        Raise(new StockAdjusted(CreateMovement(delta, 0, "MANUAL", null, idempotencyKey, correlationId, sourceEventId)));
+        Raise(new StockAdjusted(CreateMovement(
+            delta,
+            0,
+            "MANUAL",
+            null,
+            idempotencyKey,
+            correlationId,
+            operationId,
+            uomCode,
+            requestedQuantity)));
     }
 
-    public void Deduct(decimal quantity, string idempotencyKey, string correlationId, Guid sourceEventId)
+    public void Deduct(
+        decimal quantity,
+        string idempotencyKey,
+        string correlationId,
+        Guid operationId,
+        string uomCode,
+        decimal requestedQuantity)
     {
-        if (AlreadyProcessed(sourceEventId))
+        if (AlreadyProcessed(operationId))
         {
             return;
         }
 
         Guard.Positive(quantity, "stock-deduction-quantity-invalid", "Deduction quantity");
+        Guard.Positive(requestedQuantity, "stock-deduction-quantity-invalid", "Deduction quantity");
         if (quantity > AvailableQuantity)
         {
-            throw new ConflictException("insufficient-stock", "The deduction exceeds available stock.");
+            throw new ConflictException(InventoryFailureCode.InsufficientStock, "The deduction exceeds available stock.");
         }
 
-        Raise(new StockDeducted(CreateMovement(-quantity, 0, "MANUAL", null, idempotencyKey, correlationId, sourceEventId)));
+        Raise(new StockDeducted(CreateMovement(
+            -quantity,
+            0,
+            "MANUAL",
+            null,
+            idempotencyKey,
+            correlationId,
+            operationId,
+            uomCode,
+            requestedQuantity)));
     }
 
-    public void Reserve(decimal quantity, Guid referenceId, string correlationId, Guid sourceEventId)
+    public void Reserve(decimal quantity, Guid referenceId, string correlationId, Guid operationId)
     {
-        if (AlreadyProcessed(sourceEventId))
+        if (AlreadyProcessed(operationId))
         {
             if (_reservations.TryGetValue(referenceId, out decimal existingQuantity) && existingQuantity == quantity)
             {
@@ -112,7 +190,7 @@ public sealed class StockItemAggregate : AggregateRoot
             }
 
             throw new ConflictException(
-                "stock-reservation-already-compensated",
+                InventoryFailureCode.ReservationAlreadyCompensated,
                 "The idempotent reservation was already completed and is no longer active.");
         }
 
@@ -124,47 +202,85 @@ public sealed class StockItemAggregate : AggregateRoot
 
         if (_reservations.ContainsKey(referenceId))
         {
-            throw new ConflictException("stock-reservation-conflict", "A reservation already exists for this reference.");
+            throw new ConflictException(
+                InventoryFailureCode.ReservationConflict,
+                "A reservation already exists for this reference.");
         }
 
         if (quantity > AvailableQuantity)
         {
-            throw new ConflictException("insufficient-stock", "The reservation exceeds available stock.");
+            throw new ConflictException(InventoryFailureCode.InsufficientStock, "The reservation exceeds available stock.");
         }
 
-        Raise(new StockReserved(CreateMovement(0, quantity, "ORDER", referenceId, sourceEventId.ToString("N"), correlationId, sourceEventId)));
+        Raise(new StockReserved(CreateMovement(
+            0,
+            quantity,
+            "ORDER",
+            referenceId,
+            operationId.ToString("N"),
+            correlationId,
+            operationId,
+            BaseUomCode,
+            quantity)));
     }
 
-    public void Commit(Guid referenceId, string correlationId, Guid sourceEventId)
+    public void Commit(Guid referenceId, string correlationId, Guid operationId)
     {
-        if (AlreadyProcessed(sourceEventId))
+        if (AlreadyProcessed(operationId))
         {
             return;
         }
 
         decimal quantity = GetReservation(referenceId);
-        Raise(new StockCommitted(CreateMovement(-quantity, -quantity, "ORDER", referenceId, sourceEventId.ToString("N"), correlationId, sourceEventId)));
+        Raise(new StockCommitted(CreateMovement(
+            -quantity,
+            -quantity,
+            "ORDER",
+            referenceId,
+            operationId.ToString("N"),
+            correlationId,
+            operationId,
+            BaseUomCode,
+            quantity)));
     }
 
-    public void Release(Guid referenceId, string correlationId, Guid sourceEventId)
+    public void Release(Guid referenceId, string correlationId, Guid operationId)
     {
-        if (AlreadyProcessed(sourceEventId))
+        if (AlreadyProcessed(operationId))
         {
             return;
         }
 
         decimal quantity = GetReservation(referenceId);
-        Raise(new StockReleased(CreateMovement(0, -quantity, "ORDER", referenceId, sourceEventId.ToString("N"), correlationId, sourceEventId)));
+        Raise(new StockReleased(CreateMovement(
+            0,
+            -quantity,
+            "ORDER",
+            referenceId,
+            operationId.ToString("N"),
+            correlationId,
+            operationId,
+            BaseUomCode,
+            quantity)));
     }
 
-    public void ReleaseIfPresent(Guid referenceId, string correlationId, Guid sourceEventId)
+    public void ReleaseIfPresent(Guid referenceId, string correlationId, Guid operationId)
     {
-        if (AlreadyProcessed(sourceEventId) || !_reservations.TryGetValue(referenceId, out decimal quantity))
+        if (AlreadyProcessed(operationId) || !_reservations.TryGetValue(referenceId, out decimal quantity))
         {
             return;
         }
 
-        Raise(new StockReleased(CreateMovement(0, -quantity, "ORDER", referenceId, sourceEventId.ToString("N"), correlationId, sourceEventId)));
+        Raise(new StockReleased(CreateMovement(
+            0,
+            -quantity,
+            "ORDER",
+            referenceId,
+            operationId.ToString("N"),
+            correlationId,
+            operationId,
+            BaseUomCode,
+            quantity)));
     }
 
     protected override void Apply(IDomainEvent domainEvent)
@@ -196,21 +312,23 @@ public sealed class StockItemAggregate : AggregateRoot
         }
     }
 
-    private bool AlreadyProcessed(Guid sourceEventId)
+    private bool AlreadyProcessed(Guid operationId)
     {
-        if (sourceEventId == Guid.Empty)
+        if (operationId == Guid.Empty)
         {
-            throw new DomainException("stock-source-event-id-required", "Source event id is required.");
+            throw new DomainException("stock-operation-id-required", "Operation id is required.");
         }
 
-        return _processedSourceEvents.Contains(sourceEventId);
+        return _processedOperations.Contains(operationId);
     }
 
     private decimal GetReservation(Guid referenceId)
     {
         if (!_reservations.TryGetValue(referenceId, out decimal quantity))
         {
-            throw new ConflictException("stock-reservation-not-found", $"No active reservation exists for reference '{referenceId}'.");
+            throw new ConflictException(
+                InventoryFailureCode.ReservationNotFound,
+                $"No active reservation exists for reference '{referenceId}'.");
         }
 
         return quantity;
@@ -223,7 +341,9 @@ public sealed class StockItemAggregate : AggregateRoot
         Guid? referenceId,
         string idempotencyKey,
         string correlationId,
-        Guid sourceEventId)
+        Guid operationId,
+        string uomCode,
+        decimal quantity)
     {
         string key = Guard.Required(
             idempotencyKey,
@@ -240,9 +360,9 @@ public sealed class StockItemAggregate : AggregateRoot
             "stock-reference-type-invalid",
             "Reference type",
             InventoryRules.ReferenceTypeMaximumLength);
-        if (sourceEventId == Guid.Empty)
+        if (operationId == Guid.Empty)
         {
-            throw new DomainException("stock-source-event-id-required", "Source event id is required.");
+            throw new DomainException("stock-operation-id-required", "Operation id is required.");
         }
 
         return new StockMovementData(
@@ -253,7 +373,18 @@ public sealed class StockItemAggregate : AggregateRoot
             referenceId,
             key,
             correlation,
-            sourceEventId);
+            operationId,
+            NormalizeUomCode(uomCode),
+            quantity);
+    }
+
+    private static string NormalizeUomCode(string uomCode)
+    {
+        return Guard.Required(
+            uomCode,
+            "stock-item-uom-invalid",
+            "UoM code",
+            InventoryRules.UomCodeMaximumLength).ToUpperInvariant();
     }
 
     private void ApplyMovement(StockMovementData movement)
@@ -261,7 +392,7 @@ public sealed class StockItemAggregate : AggregateRoot
         OnHandQuantity += movement.OnHandQuantityDelta;
         ReservedQuantity += movement.ReservedQuantityDelta;
         EnsureBalances(OnHandQuantity, ReservedQuantity);
-        _processedSourceEvents.Add(movement.SourceEventId);
+        _processedOperations.Add(movement.OperationId);
     }
 
     private static void EnsureBalances(decimal onHand, decimal reserved)

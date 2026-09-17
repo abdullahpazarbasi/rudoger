@@ -46,13 +46,15 @@ public sealed class OrderApplicationService(
     public async Task<OrderPlacementView> GetPlacementAsync(Guid placementId, CancellationToken cancellationToken)
     {
         return await placementRepository.GetAsync(placementId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Order placement '{placementId}' was not found.");
+            ?? throw new NotFoundException(
+                "order-placement-not-found",
+                $"Order placement '{placementId}' was not found.");
     }
 
     public async Task<OrderView> GetAsync(Guid orderId, CancellationToken cancellationToken)
     {
         return await orderRepository.GetAsync(orderId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Order '{orderId}' was not found.");
+            ?? throw new NotFoundException("order-not-found", $"Order '{orderId}' was not found.");
     }
 
     public Task<Page<OrderView>> ListAsync(int? pageNumber, int? pageSize, CancellationToken cancellationToken)
@@ -67,7 +69,7 @@ public sealed class OrderApplicationService(
         CancellationToken cancellationToken)
     {
         OrderAggregate aggregate = await orderRepository.LoadAsync(orderId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Order '{orderId}' was not found.");
+            ?? throw new NotFoundException("order-not-found", $"Order '{orderId}' was not found.");
         Guid transitionId = aggregate.RequestTransition(target);
         await orderRepository.SaveAsync(aggregate, cancellationToken);
         return await GetTransitionAsync(orderId, transitionId, cancellationToken);
@@ -79,7 +81,9 @@ public sealed class OrderApplicationService(
         CancellationToken cancellationToken)
     {
         return await orderRepository.GetTransitionAsync(orderId, transitionId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Order transition '{transitionId}' was not found.");
+            ?? throw new NotFoundException(
+                "order-transition-not-found",
+                $"Order transition '{transitionId}' was not found.");
     }
 
     public Task<bool> HasAnyOrderAsync(Guid productId, CancellationToken cancellationToken)

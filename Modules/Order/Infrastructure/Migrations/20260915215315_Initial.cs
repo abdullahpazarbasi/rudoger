@@ -116,8 +116,8 @@ namespace Rudoger.Modules.Order.Infrastructure.Migrations
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UomCode = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false),
                     Quantity = table.Column<decimal>(type: "decimal(19,6)", precision: 19, scale: 6, nullable: false),
-                    ReservationSourceEventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ReleaseSourceEventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    ReservationOperationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReleaseOperationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {

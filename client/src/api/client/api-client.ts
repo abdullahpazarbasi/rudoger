@@ -5,8 +5,9 @@ import type { paths } from "../generated/schema";
 import { queryKeys } from "../query-keys";
 
 export const apiBaseUrl: string =
-  typeof import.meta.env.VITE_API_BASE_URL === "string"
-    ? import.meta.env.VITE_API_BASE_URL
+  typeof import.meta.env.VITE_API_BASE_URL === "string" &&
+  import.meta.env.VITE_API_BASE_URL.trim() !== ""
+    ? import.meta.env.VITE_API_BASE_URL.trim()
     : window.location.origin;
 
 export const apiClient: Client<paths> = createClient<paths>({

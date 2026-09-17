@@ -6,17 +6,17 @@ public interface IInventoryInternalApi
         Guid productId,
         decimal quantity,
         Guid orderId,
-        Guid sourceEventId,
+        Guid operationId,
         CancellationToken cancellationToken);
 
-    Task CommitAsync(Guid productId, Guid orderId, Guid sourceEventId, CancellationToken cancellationToken);
+    Task CommitAsync(Guid productId, Guid orderId, Guid operationId, CancellationToken cancellationToken);
 
-    Task ReleaseAsync(Guid productId, Guid orderId, Guid sourceEventId, CancellationToken cancellationToken);
+    Task ReleaseAsync(Guid productId, Guid orderId, Guid operationId, CancellationToken cancellationToken);
 
     Task CompensateReservationAsync(
         Guid productId,
         Guid orderId,
-        Guid sourceEventId,
+        Guid operationId,
         CancellationToken cancellationToken);
 
     Task<bool> HasAnyStockAsync(Guid productId, CancellationToken cancellationToken);

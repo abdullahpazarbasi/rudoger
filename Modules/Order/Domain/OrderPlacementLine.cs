@@ -6,5 +6,5 @@ public sealed record OrderPlacementLine(
     Guid ProductId,
     string UomCode,
     decimal Quantity,
-    Guid ReservationSourceEventId,
-    Guid ReleaseSourceEventId);
+    Guid ReservationOperationId,
+    Guid ReleaseOperationId);

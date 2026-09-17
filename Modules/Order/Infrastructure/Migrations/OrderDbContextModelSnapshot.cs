@@ -183,10 +183,10 @@ namespace Rudoger.Modules.Order.Infrastructure.Migrations
                         .HasPrecision(19, 6)
                         .HasColumnType("decimal(19,6)");
 
-                    b.Property<Guid>("ReleaseSourceEventId")
+                    b.Property<Guid>("ReleaseOperationId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ReservationSourceEventId")
+                    b.Property<Guid>("ReservationOperationId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UomCode")

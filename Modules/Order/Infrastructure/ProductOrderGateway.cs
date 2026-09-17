@@ -12,10 +12,15 @@ public sealed class ProductOrderGateway(IProductInternalApi productApi, IInterna
         IReadOnlyCollection<string> uomCodes,
         CancellationToken cancellationToken)
     {
-        ProductOfferContract offer = await callLogger.ExecuteAsync(
+        ProductOfferContract offer = await TranslateAsync(() => callLogger.ExecuteAsync(
             "Product.ClaimOrderUsage",
-            token => productApi.ClaimOfferAsync(productId, operationId, "ORDER_PLACEMENT", uomCodes, token),
-            cancellationToken);
+            token => productApi.ClaimOfferAsync(
+                productId,
+                operationId,
+                ProductUsageType.OrderPlacement,
+                uomCodes,
+                token),
+            cancellationToken));
         return new OrderProductOffer(
             offer.ProductId,
             offer.BasePriceAmount,
@@ -25,9 +30,33 @@ public sealed class ProductOrderGateway(IProductInternalApi productApi, IInterna
 
     public Task ReleaseUsageAsync(Guid productId, Guid operationId, CancellationToken cancellationToken)
     {
-        return callLogger.ExecuteAsync(
+        return TranslateAsync(() => callLogger.ExecuteAsync(
             "Product.ReleaseOrderUsage",
             token => productApi.ReleaseUsageAsync(productId, operationId, token),
-            cancellationToken);
+            cancellationToken));
+    }
+
+    private static async Task<T> TranslateAsync<T>(Func<Task<T>> call)
+    {
+        try
+        {
+            return await call();
+        }
+        catch (Exception exception) when (OrderGatewayFailure.IsPublishedFailure(exception))
+        {
+            throw OrderGatewayFailure.FromProduct(exception);
+        }
+    }
+
+    private static async Task TranslateAsync(Func<Task> call)
+    {
+        try
+        {
+            await call();
+        }
+        catch (Exception exception) when (OrderGatewayFailure.IsPublishedFailure(exception))
+        {
+            throw OrderGatewayFailure.FromProduct(exception);
+        }
     }
 }

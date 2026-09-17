@@ -151,7 +151,7 @@ public sealed class ProductApplicationService(
         ProductAggregate? aggregate = await repository.LoadAsync(id, cancellationToken);
         if (aggregate is null || aggregate.IsDeleted)
         {
-            throw new KeyNotFoundException($"Product '{id}' was not found.");
+            throw new NotFoundException(ProductFailureCode.ProductNotFound, $"Product '{id}' was not found.");
         }
 
         return aggregate;
@@ -160,7 +160,7 @@ public sealed class ProductApplicationService(
     private async Task<ProductView> GetRequiredAsync(Guid id, CancellationToken cancellationToken)
     {
         return await repository.GetAsync(id, cancellationToken)
-            ?? throw new KeyNotFoundException($"Product '{id}' was not found.");
+            ?? throw new NotFoundException(ProductFailureCode.ProductNotFound, $"Product '{id}' was not found.");
     }
 
     private static PackagingDefinition ToDefinition(PackagingInput input)

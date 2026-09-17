@@ -14,9 +14,9 @@ public sealed class OrderPlacementLineReadEntity
 
     public decimal Quantity { get; set; }
 
-    public Guid ReservationSourceEventId { get; set; }
+    public Guid ReservationOperationId { get; set; }
 
-    public Guid ReleaseSourceEventId { get; set; }
+    public Guid ReleaseOperationId { get; set; }
 
     public OrderPlacementReadEntity Placement { get; set; } = null!;
 }

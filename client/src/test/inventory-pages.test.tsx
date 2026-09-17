@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createStockItem,
   createStockMovement,
+  getProduct,
   getStockItem,
   listProducts,
   listStockItems,
@@ -20,6 +21,7 @@ import { StockDetailPage } from "../features/inventory/stock-detail-page";
 vi.mock("../api/client/rudoger-api", () => ({
   createStockItem: vi.fn(),
   createStockMovement: vi.fn(),
+  getProduct: vi.fn(),
   getStockItem: vi.fn(),
   listProducts: vi.fn(),
   listStockItems: vi.fn(),
@@ -44,6 +46,17 @@ const product: Product = {
       widthInMm: null,
       heightInMm: null,
     },
+    {
+      id: "01990101-0000-7000-8000-000000000007",
+      level: 1,
+      uomCode: "CASE",
+      conversionFactor: 10,
+      barcode: null,
+      weightInKg: null,
+      lengthInMm: null,
+      widthInMm: null,
+      heightInMm: null,
+    },
   ],
 };
 const stock: StockItem = {
@@ -58,13 +71,14 @@ const movement: StockMovement = {
   id: "01990101-0000-7000-8000-000000000004",
   stockItemId: stock.id,
   type: "Reserved",
+  uomCode: "EA",
+  quantity: 2,
   onHandQuantityDelta: 0,
   reservedQuantityDelta: 2,
   referenceType: "ORDER",
   referenceId: "01990101-0000-7000-8000-000000000005",
   idempotencyKey: "key",
   correlationId: "correlation",
-  sourceEventId: "01990101-0000-7000-8000-000000000006",
   occurredAtUtc: "2026-01-01T00:00:00Z",
 };
 function authenticate() {
@@ -113,6 +127,7 @@ describe("inventory use cases", () => {
       totalCount: 21,
     });
     vi.mocked(createStockItem).mockResolvedValue(stock);
+    vi.mocked(getProduct).mockResolvedValue(product);
     vi.mocked(getStockItem).mockResolvedValue(stock);
     vi.mocked(listStockMovements).mockResolvedValue({
       items: [movement],
@@ -141,12 +156,14 @@ describe("inventory use cases", () => {
     const dialog = screen.getByRole("dialog", { name: "Stok kaydı aç" });
     await waitFor(() => expect(within(dialog).getByLabelText("Ürün")).toHaveTextContent("SKU"));
     await user.selectOptions(within(dialog).getByLabelText("Ürün"), product.id);
+    await user.selectOptions(within(dialog).getByLabelText("UoM"), "CASE");
     await user.clear(within(dialog).getByLabelText("Açılış miktarı"));
     await user.type(within(dialog).getByLabelText("Açılış miktarı"), "5");
     await user.click(within(dialog).getByRole("button", { name: "Stok Kaydını Aç" }));
     await waitFor(() =>
       expect(vi.mocked(createStockItem)).toHaveBeenCalledWith(
         product.id,
+        "CASE",
         5,
         expect.stringContaining("stock-open-"),
       ),
@@ -160,7 +177,9 @@ describe("inventory use cases", () => {
     renderAt(<InventoryPage />, `/stok/${stock.id}`);
     expect(await screen.findByRole("heading", { name: "Bakiyeler" })).toBeInTheDocument();
     expect(screen.getByText("Rezerve edildi")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByLabelText("UoM")).toHaveValue("EA"));
     await user.selectOptions(screen.getByLabelText("Hareket türü"), "Adjustment");
+    await user.selectOptions(screen.getByLabelText("UoM"), "CASE");
     await user.type(screen.getByLabelText("Miktar"), "0");
     await user.click(screen.getByRole("button", { name: "Hareketi İşle" }));
     expect(await screen.findByText("Düzeltme miktarı sıfır olamaz.")).toBeInTheDocument();
@@ -171,6 +190,7 @@ describe("inventory use cases", () => {
       expect(vi.mocked(createStockMovement)).toHaveBeenCalledWith(
         stock.id,
         "Adjustment",
+        "CASE",
         -2,
         expect.stringContaining("stock-movement-"),
       ),

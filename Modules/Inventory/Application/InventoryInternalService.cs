@@ -12,40 +12,40 @@ public sealed class InventoryInternalService(
         Guid productId,
         decimal quantity,
         Guid orderId,
-        Guid sourceEventId,
+        Guid operationId,
         CancellationToken cancellationToken)
     {
         StockItemAggregate aggregate = await LoadByProductRequiredAsync(productId, cancellationToken);
-        aggregate.Reserve(quantity, orderId, correlationContextAccessor.Current.CorrelationId, sourceEventId);
+        aggregate.Reserve(quantity, orderId, correlationContextAccessor.Current.CorrelationId, operationId);
         await repository.SaveAsync(aggregate, cancellationToken);
     }
 
     public async Task CommitAsync(
         Guid productId,
         Guid orderId,
-        Guid sourceEventId,
+        Guid operationId,
         CancellationToken cancellationToken)
     {
         StockItemAggregate aggregate = await LoadByProductRequiredAsync(productId, cancellationToken);
-        aggregate.Commit(orderId, correlationContextAccessor.Current.CorrelationId, sourceEventId);
+        aggregate.Commit(orderId, correlationContextAccessor.Current.CorrelationId, operationId);
         await repository.SaveAsync(aggregate, cancellationToken);
     }
 
     public async Task ReleaseAsync(
         Guid productId,
         Guid orderId,
-        Guid sourceEventId,
+        Guid operationId,
         CancellationToken cancellationToken)
     {
         StockItemAggregate aggregate = await LoadByProductRequiredAsync(productId, cancellationToken);
-        aggregate.Release(orderId, correlationContextAccessor.Current.CorrelationId, sourceEventId);
+        aggregate.Release(orderId, correlationContextAccessor.Current.CorrelationId, operationId);
         await repository.SaveAsync(aggregate, cancellationToken);
     }
 
     public async Task CompensateReservationAsync(
         Guid productId,
         Guid orderId,
-        Guid sourceEventId,
+        Guid operationId,
         CancellationToken cancellationToken)
     {
         StockItemAggregate? aggregate = await repository.LoadByProductAsync(productId, cancellationToken);
@@ -54,7 +54,7 @@ public sealed class InventoryInternalService(
             return;
         }
 
-        aggregate.ReleaseIfPresent(orderId, correlationContextAccessor.Current.CorrelationId, sourceEventId);
+        aggregate.ReleaseIfPresent(orderId, correlationContextAccessor.Current.CorrelationId, operationId);
         await repository.SaveAsync(aggregate, cancellationToken);
     }
 
@@ -67,6 +67,8 @@ public sealed class InventoryInternalService(
     private async Task<StockItemAggregate> LoadByProductRequiredAsync(Guid productId, CancellationToken cancellationToken)
     {
         return await repository.LoadByProductAsync(productId, cancellationToken)
-            ?? throw new ConflictException("stock-item-not-found", $"No stock item exists for product '{productId}'.");
+            ?? throw new ConflictException(
+                InventoryFailureCode.StockItemMissingForProduct,
+                $"No stock item exists for product '{productId}'.");
     }
 }

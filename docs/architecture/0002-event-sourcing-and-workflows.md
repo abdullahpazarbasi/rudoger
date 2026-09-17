@@ -1,8 +1,5 @@
 # ADR 0002: Event sourcing, aynı transaction'da projeksiyon ve outbox iş akışları
 
-- Durum: Kabul edildi
-- Tarih: 2026-09-16
-
 ## Bağlam
 
 İş durumu denetlenebilir olmalı ve yarış durumları aggregate sürümüyle çözülmelidir. Sipariş oluşturma veya geçişi, başka bir bounded context'in sahibi olduğu stoku da değiştirir; bu nedenle tek bir veritabanı transaction'ı iki bağlamı birden kapsamamalıdır.

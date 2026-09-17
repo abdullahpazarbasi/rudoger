@@ -41,17 +41,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenResult"
+                  "$ref": "#/components/schemas/TokenResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenResult"
+                  "$ref": "#/components/schemas/TokenResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenResult"
+                  "$ref": "#/components/schemas/TokenResponse"
                 }
               }
             }
@@ -99,22 +99,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockItemView"
+                  "$ref": "#/components/schemas/StockItemResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockItemView"
+                  "$ref": "#/components/schemas/StockItemResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockItemView"
+                  "$ref": "#/components/schemas/StockItemResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "get": {
         "tags": [
@@ -160,22 +165,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfStockItemView"
+                  "$ref": "#/components/schemas/PageResponseOfStockItemResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfStockItemView"
+                  "$ref": "#/components/schemas/PageResponseOfStockItemResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfStockItemView"
+                  "$ref": "#/components/schemas/PageResponseOfStockItemResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/inventory/stock-items/{stockItemId}": {
@@ -200,22 +210,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockItemView"
+                  "$ref": "#/components/schemas/StockItemResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockItemView"
+                  "$ref": "#/components/schemas/StockItemResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockItemView"
+                  "$ref": "#/components/schemas/StockItemResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/inventory/stock-items/{stockItemId}/movements": {
@@ -267,22 +282,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockMovementView"
+                  "$ref": "#/components/schemas/StockMovementResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockMovementView"
+                  "$ref": "#/components/schemas/StockMovementResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StockMovementView"
+                  "$ref": "#/components/schemas/StockMovementResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "get": {
         "tags": [
@@ -329,22 +349,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfStockMovementView"
+                  "$ref": "#/components/schemas/PageResponseOfStockMovementResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfStockMovementView"
+                  "$ref": "#/components/schemas/PageResponseOfStockMovementResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfStockMovementView"
+                  "$ref": "#/components/schemas/PageResponseOfStockMovementResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/order/orders": {
@@ -387,22 +412,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderPlacementView"
+                  "$ref": "#/components/schemas/OrderPlacementResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderPlacementView"
+                  "$ref": "#/components/schemas/OrderPlacementResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderPlacementView"
+                  "$ref": "#/components/schemas/OrderPlacementResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "get": {
         "tags": [
@@ -440,22 +470,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfOrderView"
+                  "$ref": "#/components/schemas/PageResponseOfOrderResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfOrderView"
+                  "$ref": "#/components/schemas/PageResponseOfOrderResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfOrderView"
+                  "$ref": "#/components/schemas/PageResponseOfOrderResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/order/orders/{orderId}": {
@@ -480,22 +515,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderView"
+                  "$ref": "#/components/schemas/OrderResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderView"
+                  "$ref": "#/components/schemas/OrderResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderView"
+                  "$ref": "#/components/schemas/OrderResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/order/order-placements/{placementId}": {
@@ -520,22 +560,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderPlacementView"
+                  "$ref": "#/components/schemas/OrderPlacementResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderPlacementView"
+                  "$ref": "#/components/schemas/OrderPlacementResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderPlacementView"
+                  "$ref": "#/components/schemas/OrderPlacementResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/order/orders/{orderId}/transitions": {
@@ -580,22 +625,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderTransitionView"
+                  "$ref": "#/components/schemas/OrderTransitionResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderTransitionView"
+                  "$ref": "#/components/schemas/OrderTransitionResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderTransitionView"
+                  "$ref": "#/components/schemas/OrderTransitionResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/order/orders/{orderId}/transitions/{transitionId}": {
@@ -629,22 +679,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderTransitionView"
+                  "$ref": "#/components/schemas/OrderTransitionResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderTransitionView"
+                  "$ref": "#/components/schemas/OrderTransitionResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrderTransitionView"
+                  "$ref": "#/components/schemas/OrderTransitionResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/product/products": {
@@ -678,22 +733,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "get": {
         "tags": [
@@ -742,22 +802,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfProductView"
+                  "$ref": "#/components/schemas/PageResponseOfProductResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfProductView"
+                  "$ref": "#/components/schemas/PageResponseOfProductResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfProductView"
+                  "$ref": "#/components/schemas/PageResponseOfProductResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/product/products/{productId}": {
@@ -782,22 +847,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "patch": {
         "tags": [
@@ -830,22 +900,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductView"
+                  "$ref": "#/components/schemas/ProductResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "delete": {
         "tags": [
@@ -866,7 +941,12 @@
           "204": {
             "description": "No Content"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/product/products/{productId}/packagings": {
@@ -911,22 +991,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "get": {
         "tags": [
@@ -951,7 +1036,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ProductPackagingView"
+                    "$ref": "#/components/schemas/ProductPackagingResponse"
                   }
                 }
               },
@@ -959,7 +1044,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ProductPackagingView"
+                    "$ref": "#/components/schemas/ProductPackagingResponse"
                   }
                 }
               },
@@ -967,13 +1052,18 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ProductPackagingView"
+                    "$ref": "#/components/schemas/ProductPackagingResponse"
                   }
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/v1/product/products/{productId}/packagings/{packagingId}": {
@@ -1007,22 +1097,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "patch": {
         "tags": [
@@ -1064,22 +1159,27 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProductPackagingView"
+                  "$ref": "#/components/schemas/ProductPackagingResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       },
       "delete": {
         "tags": [
@@ -1109,13 +1209,29 @@
           "204": {
             "description": "No Content"
           }
-        }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     }
   },
   "components": {
     "schemas": {
       "CreateOrderRequest": {
+        "examples": [
+          {
+            "lines": [
+              {
+                "productId": "00000000-0000-0000-0000-000000000000",
+                "uomCode": "CASE",
+                "quantity": 2
+              }
+            ]
+          }
+        ],
         "required": [
           "lines"
         ],
@@ -1130,17 +1246,45 @@
         }
       },
       "CreateOrderTransitionRequest": {
+        "examples": [
+          {
+            "target": "Shipped"
+          }
+        ],
         "required": [
           "target"
         ],
         "type": "object",
         "properties": {
           "target": {
-            "$ref": "#/components/schemas/OrderTransitionTarget"
+            "$ref": "#/components/schemas/OrderTransitionTargetContract"
           }
         }
       },
       "CreateProductRequest": {
+        "examples": [
+          {
+            "sku": "COFFEE-001",
+            "name": "Coffee",
+            "baseUomCode": "EA",
+            "basePriceAmount": 2.5,
+            "basePriceCurrencyCode": "TRY",
+            "packagings": [
+              {
+                "level": 0,
+                "uomCode": "EA",
+                "conversionFactor": 1,
+                "barcode": "869000000001"
+              },
+              {
+                "level": 1,
+                "uomCode": "CASE",
+                "conversionFactor": 10,
+                "barcode": "869000000010"
+              }
+            ]
+          }
+        ],
         "required": [
           "sku",
           "name",
@@ -1180,8 +1324,16 @@
         }
       },
       "CreateStockItemRequest": {
+        "examples": [
+          {
+            "productId": "00000000-0000-0000-0000-000000000000",
+            "uomCode": "CASE",
+            "openingQuantity": 10
+          }
+        ],
         "required": [
           "productId",
+          "uomCode",
           "openingQuantity"
         ],
         "type": "object",
@@ -1189,6 +1341,9 @@
           "productId": {
             "type": "string",
             "format": "uuid"
+          },
+          "uomCode": {
+            "type": "string"
           },
           "openingQuantity": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
@@ -1201,14 +1356,25 @@
         }
       },
       "CreateStockMovementRequest": {
+        "examples": [
+          {
+            "type": "Receipt",
+            "uomCode": "CASE",
+            "quantity": 2
+          }
+        ],
         "required": [
           "type",
+          "uomCode",
           "quantity"
         ],
         "type": "object",
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/StockMovementType"
+            "$ref": "#/components/schemas/StockMovementTypeContract"
+          },
+          "uomCode": {
+            "type": "string"
           },
           "quantity": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
@@ -1294,7 +1460,7 @@
           ]
         }
       },
-      "OrderLineView": {
+      "OrderLineResponse": {
         "required": [
           "id",
           "num",
@@ -1371,7 +1537,7 @@
           }
         }
       },
-      "OrderPlacementLineView": {
+      "OrderPlacementLineResponse": {
         "required": [
           "num",
           "productId",
@@ -1405,10 +1571,7 @@
           }
         }
       },
-      "OrderPlacementStatus": {
-        "type": "integer"
-      },
-      "OrderPlacementView": {
+      "OrderPlacementResponse": {
         "required": [
           "id",
           "orderId",
@@ -1433,12 +1596,12 @@
             "format": "uuid"
           },
           "status": {
-            "$ref": "#/components/schemas/OrderPlacementStatus"
+            "$ref": "#/components/schemas/OrderPlacementStatusContract"
           },
           "lines": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/OrderPlacementLineView"
+              "$ref": "#/components/schemas/OrderPlacementLineResponse"
             }
           },
           "failureCode": {
@@ -1455,41 +1618,10 @@
           }
         }
       },
-      "OrderStatus": {
+      "OrderPlacementStatusContract": {
         "type": "integer"
       },
-      "OrderTransitionStatus": {
-        "type": "integer"
-      },
-      "OrderTransitionTarget": {
-        "type": "integer"
-      },
-      "OrderTransitionView": {
-        "required": [
-          "id",
-          "orderId",
-          "target",
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "target": {
-            "$ref": "#/components/schemas/OrderTransitionTarget"
-          },
-          "status": {
-            "$ref": "#/components/schemas/OrderTransitionStatus"
-          }
-        }
-      },
-      "OrderView": {
+      "OrderResponse": {
         "required": [
           "id",
           "orderNumber",
@@ -1509,7 +1641,7 @@
             "type": "string"
           },
           "status": {
-            "$ref": "#/components/schemas/OrderStatus"
+            "$ref": "#/components/schemas/OrderStatusContract"
           },
           "userId": {
             "type": "string",
@@ -1518,7 +1650,7 @@
           "lines": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/OrderLineView"
+              "$ref": "#/components/schemas/OrderLineResponse"
             }
           },
           "pendingTransitionId": {
@@ -1534,13 +1666,47 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/OrderTransitionTarget"
+                "$ref": "#/components/schemas/OrderTransitionTargetContract"
               }
             ]
           }
         }
       },
-      "PageOfOrderView": {
+      "OrderStatusContract": {
+        "type": "integer"
+      },
+      "OrderTransitionResponse": {
+        "required": [
+          "id",
+          "orderId",
+          "target",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target": {
+            "$ref": "#/components/schemas/OrderTransitionTargetContract"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderTransitionStatusContract"
+          }
+        }
+      },
+      "OrderTransitionStatusContract": {
+        "type": "integer"
+      },
+      "OrderTransitionTargetContract": {
+        "type": "integer"
+      },
+      "PageResponseOfOrderResponse": {
         "required": [
           "items",
           "pageNumber",
@@ -1552,7 +1718,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/OrderView"
+              "$ref": "#/components/schemas/OrderResponse"
             }
           },
           "pageNumber": {
@@ -1581,7 +1747,7 @@
           }
         }
       },
-      "PageOfProductView": {
+      "PageResponseOfProductResponse": {
         "required": [
           "items",
           "pageNumber",
@@ -1593,7 +1759,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ProductView"
+              "$ref": "#/components/schemas/ProductResponse"
             }
           },
           "pageNumber": {
@@ -1622,7 +1788,7 @@
           }
         }
       },
-      "PageOfStockItemView": {
+      "PageResponseOfStockItemResponse": {
         "required": [
           "items",
           "pageNumber",
@@ -1634,7 +1800,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/StockItemView"
+              "$ref": "#/components/schemas/StockItemResponse"
             }
           },
           "pageNumber": {
@@ -1663,7 +1829,7 @@
           }
         }
       },
-      "PageOfStockMovementView": {
+      "PageResponseOfStockMovementResponse": {
         "required": [
           "items",
           "pageNumber",
@@ -1675,7 +1841,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/StockMovementView"
+              "$ref": "#/components/schemas/StockMovementResponse"
             }
           },
           "pageNumber": {
@@ -1788,7 +1954,7 @@
           }
         }
       },
-      "ProductPackagingView": {
+      "ProductPackagingResponse": {
         "required": [
           "id",
           "level",
@@ -1869,7 +2035,7 @@
           }
         }
       },
-      "ProductView": {
+      "ProductResponse": {
         "required": [
           "id",
           "sku",
@@ -1908,12 +2074,12 @@
           "packagings": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ProductPackagingView"
+              "$ref": "#/components/schemas/ProductPackagingResponse"
             }
           }
         }
       },
-      "StockItemView": {
+      "StockItemResponse": {
         "required": [
           "id",
           "productId",
@@ -1961,21 +2127,19 @@
           }
         }
       },
-      "StockMovementType": {
-        "type": "integer"
-      },
-      "StockMovementView": {
+      "StockMovementResponse": {
         "required": [
           "id",
           "stockItemId",
           "type",
+          "uomCode",
+          "quantity",
           "onHandQuantityDelta",
           "reservedQuantityDelta",
           "referenceType",
           "referenceId",
           "idempotencyKey",
           "correlationId",
-          "sourceEventId",
           "occurredAtUtc"
         ],
         "type": "object",
@@ -1989,7 +2153,18 @@
             "format": "uuid"
           },
           "type": {
-            "$ref": "#/components/schemas/StockMovementType"
+            "$ref": "#/components/schemas/StockMovementTypeContract"
+          },
+          "uomCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
           },
           "onHandQuantityDelta": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
@@ -2023,17 +2198,22 @@
           "correlationId": {
             "type": "string"
           },
-          "sourceEventId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "occurredAtUtc": {
             "type": "string",
             "format": "date-time"
           }
         }
       },
+      "StockMovementTypeContract": {
+        "type": "integer"
+      },
       "TokenExchangeRequest": {
+        "examples": [
+          {
+            "username": "abdullah",
+            "password": "12345678"
+          }
+        ],
         "required": [
           "username",
           "password"
@@ -2048,7 +2228,7 @@
           }
         }
       },
-      "TokenResult": {
+      "TokenResponse": {
         "required": [
           "accessToken",
           "tokenType",
@@ -2071,6 +2251,14 @@
             "format": "int32"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "Access token issued by POST /api/v1/authn/tokens.",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   },

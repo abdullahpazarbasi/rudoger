@@ -10,6 +10,10 @@ public sealed class StockItemReadEntity
 
     public decimal OpeningQuantity { get; set; }
 
+    public string OpeningUomCode { get; set; } = string.Empty;
+
+    public decimal RequestedOpeningQuantity { get; set; }
+
     public string CreationIdempotencyKey { get; set; } = string.Empty;
 
     public decimal OnHandQuantity { get; set; }

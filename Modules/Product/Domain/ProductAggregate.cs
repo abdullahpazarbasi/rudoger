@@ -94,7 +94,9 @@ public sealed class ProductAggregate : AggregateRoot
         EnsureActive();
         if (!_packagings.TryGetValue(definition.Id, out ProductPackaging? current))
         {
-            throw new KeyNotFoundException($"Packaging '{definition.Id}' was not found.");
+            throw new NotFoundException(
+                "product-packaging-not-found",
+                $"Packaging '{definition.Id}' was not found.");
         }
 
         PackagingDefinition normalized = NormalizePackaging(definition, BaseUomCode);
@@ -117,7 +119,9 @@ public sealed class ProductAggregate : AggregateRoot
         EnsureActive();
         if (!_packagings.TryGetValue(packagingId, out ProductPackaging? packaging))
         {
-            throw new KeyNotFoundException($"Packaging '{packagingId}' was not found.");
+            throw new NotFoundException(
+                "product-packaging-not-found",
+                $"Packaging '{packagingId}' was not found.");
         }
 
         if (packaging.Level == 0)
@@ -146,7 +150,9 @@ public sealed class ProductAggregate : AggregateRoot
         {
             if (!string.Equals(existing, normalizedType, StringComparison.Ordinal))
             {
-                throw new ConflictException("usage-claim-conflict", "The operation id is already used by a different claim.");
+                throw new ConflictException(
+                    ProductFailureCode.UsageClaimConflict,
+                    "The operation id is already used by a different claim.");
             }
 
             return;
@@ -296,7 +302,7 @@ public sealed class ProductAggregate : AggregateRoot
     {
         if (IsDeleted)
         {
-            throw new ConflictException("product-deleted", "The product has been deleted.");
+            throw new ConflictException(ProductFailureCode.ProductDeleted, "The product has been deleted.");
         }
     }
 

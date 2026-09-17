@@ -2,11 +2,11 @@ namespace Rudoger.BuildingBlocks.Domain;
 
 public sealed class ConcurrencyException : Exception
 {
-    public ConcurrencyException(Guid streamId, Exception? innerException = null)
-        : base($"Stream '{streamId}' was modified concurrently.", innerException)
+    public ConcurrencyException(Guid aggregateId, Exception? innerException = null)
+        : base("The resource was modified concurrently. Retry the operation.", innerException)
     {
-        StreamId = streamId;
+        AggregateId = aggregateId;
     }
 
-    public Guid StreamId { get; }
+    public Guid AggregateId { get; }
 }

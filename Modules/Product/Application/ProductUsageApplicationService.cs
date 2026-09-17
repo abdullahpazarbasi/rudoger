@@ -18,7 +18,9 @@ public sealed class ProductUsageApplicationService(IProductRepository repository
         foreach (string code in normalizedCodes)
         {
             ProductPackaging packaging = aggregate.Packagings.SingleOrDefault(item => item.UomCode == code)
-                ?? throw new DomainException("packaging-not-found", $"UoM code '{code}' is not available for product '{productId}'.");
+                ?? throw new DomainException(
+                    ProductFailureCode.PackagingNotFound,
+                    $"UoM code '{code}' is not available for product '{productId}'.");
             factors.Add(code, packaging.ConversionFactor);
         }
 
@@ -44,7 +46,7 @@ public sealed class ProductUsageApplicationService(IProductRepository repository
         ProductAggregate? aggregate = await repository.LoadAsync(id, cancellationToken);
         if (aggregate is null || aggregate.IsDeleted)
         {
-            throw new KeyNotFoundException($"Product '{id}' was not found.");
+            throw new NotFoundException(ProductFailureCode.ProductNotFound, $"Product '{id}' was not found.");
         }
 
         return aggregate;

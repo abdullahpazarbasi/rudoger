@@ -12,8 +12,8 @@ using Rudoger.Modules.Inventory.Infrastructure;
 namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20260915220133_InventoryOutbox")]
-    partial class InventoryOutbox
+    [Migration("20260917185444_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -129,18 +129,39 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("nvarchar(16)");
 
+                    b.Property<string>("CreationIdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<decimal>("OnHandQuantity")
                         .HasPrecision(19, 6)
                         .HasColumnType("decimal(19,6)");
 
+                    b.Property<decimal>("OpeningQuantity")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
+                    b.Property<string>("OpeningUomCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("RequestedOpeningQuantity")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
 
                     b.Property<decimal>("ReservedQuantity")
                         .HasPrecision(19, 6)
                         .HasColumnType("decimal(19,6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreationIdempotencyKey")
+                        .IsUnique();
 
                     b.HasIndex("ProductId")
                         .IsUnique();
@@ -172,6 +193,14 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
                         .HasPrecision(19, 6)
                         .HasColumnType("decimal(19,6)");
 
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("SourceEventId");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(19, 6)
+                        .HasColumnType("decimal(19,6)");
+
                     b.Property<Guid?>("ReferenceId")
                         .HasColumnType("uniqueidentifier");
 
@@ -184,9 +213,6 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
                         .HasPrecision(19, 6)
                         .HasColumnType("decimal(19,6)");
 
-                    b.Property<Guid>("SourceEventId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("StockItemId")
                         .HasColumnType("uniqueidentifier");
 
@@ -195,12 +221,17 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("UomCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IdempotencyKey")
                         .IsUnique();
 
-                    b.HasIndex("SourceEventId")
+                    b.HasIndex("OperationId")
                         .IsUnique();
 
                     b.HasIndex("StockItemId");

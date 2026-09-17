@@ -28,7 +28,7 @@ public sealed class EventStore<TDbContext>(
     public async Task AppendAsync(
         string aggregateType,
         AggregateRoot aggregate,
-        Func<IDomainEvent, CancellationToken, Task> project,
+        Func<Guid, IDomainEvent, CancellationToken, Task> project,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(aggregateType);
@@ -60,20 +60,27 @@ public sealed class EventStore<TDbContext>(
                     new EventMetadata(context.CorrelationId, context.CausationId, context.UserId)),
                 OccurredAtUtc = timeProvider.GetUtcNow(),
             });
-
-            await project(domainEvent, cancellationToken);
         }
 
+        // The events are written on their own so that the unique (StreamId, Version) index is the
+        // only constraint that can fail here. That keeps a lost version race distinguishable from a
+        // projection constraint failure, which must not be reported as a concurrency conflict.
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            aggregate.MarkChangesAsCommitted();
         }
         catch (DbUpdateException exception)
         {
-            await transaction.RollbackAsync(cancellationToken);
             throw new ConcurrencyException(aggregate.Id, exception);
         }
+
+        foreach (IDomainEvent domainEvent in aggregate.UncommittedEvents)
+        {
+            await project(aggregate.Id, domainEvent, cancellationToken);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        aggregate.MarkChangesAsCommitted();
     }
 }

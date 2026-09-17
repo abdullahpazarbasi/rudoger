@@ -10,10 +10,11 @@ namespace Rudoger.Modules.Authn.Presentation;
 public sealed class TokensController(AuthnApplicationService service) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<TokenResult>> ExchangeAsync(
+    public async Task<ActionResult<TokenResponse>> ExchangeAsync(
         TokenExchangeRequest request,
         CancellationToken cancellationToken)
     {
-        return Ok(await service.ExchangeAsync(request.Username, request.Password, cancellationToken));
+        TokenResult result = await service.ExchangeAsync(request.Username, request.Password, cancellationToken);
+        return Ok(TokenResponse.From(result));
     }
 }

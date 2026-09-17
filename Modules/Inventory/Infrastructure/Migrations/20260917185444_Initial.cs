@@ -35,6 +35,26 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OutboxMessages",
+                schema: "inventory",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OperationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OccurredAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", precision: 7, nullable: false),
+                    NextAttemptAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", precision: 7, nullable: false),
+                    LockedUntilUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", precision: 7, nullable: true),
+                    ProcessedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", precision: 7, nullable: true),
+                    Attempts = table.Column<int>(type: "int", nullable: false),
+                    LastError = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OutboxMessages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StockItems",
                 schema: "inventory",
                 columns: table => new
@@ -42,6 +62,10 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BaseUomCode = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false),
+                    OpeningQuantity = table.Column<decimal>(type: "decimal(19,6)", precision: 19, scale: 6, nullable: false),
+                    OpeningUomCode = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false),
+                    RequestedOpeningQuantity = table.Column<decimal>(type: "decimal(19,6)", precision: 19, scale: 6, nullable: false),
+                    CreationIdempotencyKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     OnHandQuantity = table.Column<decimal>(type: "decimal(19,6)", precision: 19, scale: 6, nullable: false),
                     ReservedQuantity = table.Column<decimal>(type: "decimal(19,6)", precision: 19, scale: 6, nullable: false)
                 },
@@ -58,6 +82,8 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StockItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    UomCode = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(19,6)", precision: 19, scale: 6, nullable: false),
                     OnHandQuantityDelta = table.Column<decimal>(type: "decimal(19,6)", precision: 19, scale: 6, nullable: false),
                     ReservedQuantityDelta = table.Column<decimal>(type: "decimal(19,6)", precision: 19, scale: 6, nullable: false),
                     ReferenceType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -90,6 +116,26 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
                 schema: "inventory",
                 table: "Events",
                 columns: new[] { "StreamId", "Version" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OutboxMessages_ProcessedAtUtc_NextAttemptAtUtc",
+                schema: "inventory",
+                table: "OutboxMessages",
+                columns: new[] { "ProcessedAtUtc", "NextAttemptAtUtc" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OutboxMessages_ProductId_OperationId",
+                schema: "inventory",
+                table: "OutboxMessages",
+                columns: new[] { "ProductId", "OperationId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StockItems_CreationIdempotencyKey",
+                schema: "inventory",
+                table: "StockItems",
+                column: "CreationIdempotencyKey",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -131,6 +177,10 @@ namespace Rudoger.Modules.Inventory.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Events",
+                schema: "inventory");
+
+            migrationBuilder.DropTable(
+                name: "OutboxMessages",
                 schema: "inventory");
 
             migrationBuilder.DropTable(

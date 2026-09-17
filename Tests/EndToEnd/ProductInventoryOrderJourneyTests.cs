@@ -86,7 +86,7 @@ public sealed class ProductInventoryOrderJourneyTests(RunningApiFixture fixture)
         const string stockIdempotencyKey = "stock-open-coffee-001";
         using HttpResponseMessage stockResponse = await SendWithIdempotencyKeyAsync(
             "/api/v1/inventory/stock-items",
-            new { productId, openingQuantity = 100m },
+            new { productId, uomCode = "CASE", openingQuantity = 10m },
             stockIdempotencyKey);
         Assert.Equal(HttpStatusCode.Created, stockResponse.StatusCode);
         using JsonDocument stock = await ReadJsonAsync(stockResponse);
@@ -95,11 +95,31 @@ public sealed class ProductInventoryOrderJourneyTests(RunningApiFixture fixture)
 
         using HttpResponseMessage stockRetry = await SendWithIdempotencyKeyAsync(
             "/api/v1/inventory/stock-items",
-            new { productId, openingQuantity = 100m },
+            new { productId, uomCode = "case", openingQuantity = 10m },
             stockIdempotencyKey);
         Assert.Equal(HttpStatusCode.Created, stockRetry.StatusCode);
         using JsonDocument retriedStock = await ReadJsonAsync(stockRetry);
         Assert.Equal(stockItemId, retriedStock.RootElement.GetProperty("id").GetGuid());
+
+        const string receiptIdempotencyKey = "stock-receipt-coffee-001";
+        using HttpResponseMessage receiptResponse = await SendWithIdempotencyKeyAsync(
+            $"/api/v1/inventory/stock-items/{stockItemId}/movements",
+            new { type = "Receipt", uomCode = "CASE", quantity = 2m },
+            receiptIdempotencyKey);
+        Assert.Equal(HttpStatusCode.Created, receiptResponse.StatusCode);
+        using JsonDocument receipt = await ReadJsonAsync(receiptResponse);
+        Guid receiptId = receipt.RootElement.GetProperty("id").GetGuid();
+        Assert.Equal("CASE", receipt.RootElement.GetProperty("uomCode").GetString());
+        Assert.Equal(2m, receipt.RootElement.GetProperty("quantity").GetDecimal());
+        Assert.Equal(20m, receipt.RootElement.GetProperty("onHandQuantityDelta").GetDecimal());
+
+        using HttpResponseMessage receiptRetryResponse = await SendWithIdempotencyKeyAsync(
+            $"/api/v1/inventory/stock-items/{stockItemId}/movements",
+            new { type = "Receipt", uomCode = "case", quantity = 2m },
+            receiptIdempotencyKey);
+        Assert.Equal(HttpStatusCode.Created, receiptRetryResponse.StatusCode);
+        using JsonDocument receiptRetry = await ReadJsonAsync(receiptRetryResponse);
+        Assert.Equal(receiptId, receiptRetry.RootElement.GetProperty("id").GetGuid());
 
         using HttpResponseMessage placementResponse = await SendWithIdempotencyKeyAsync(
             "/api/v1/order/orders",
@@ -132,9 +152,9 @@ public sealed class ProductInventoryOrderJourneyTests(RunningApiFixture fixture)
         using HttpResponseMessage reservedStockResponse = await fixture.Client.GetAsync(
             $"/api/v1/inventory/stock-items/{stockItemId}");
         using JsonDocument reservedStock = await ReadJsonAsync(reservedStockResponse);
-        Assert.Equal(100m, reservedStock.RootElement.GetProperty("onHandQuantity").GetDecimal());
+        Assert.Equal(120m, reservedStock.RootElement.GetProperty("onHandQuantity").GetDecimal());
         Assert.Equal(20m, reservedStock.RootElement.GetProperty("reservedQuantity").GetDecimal());
-        Assert.Equal(80m, reservedStock.RootElement.GetProperty("availableQuantity").GetDecimal());
+        Assert.Equal(100m, reservedStock.RootElement.GetProperty("availableQuantity").GetDecimal());
 
         using HttpResponseMessage orderResponse = await fixture.Client.GetAsync($"/api/v1/order/orders/{orderId}");
         using JsonDocument order = await ReadJsonAsync(orderResponse);
@@ -151,9 +171,9 @@ public sealed class ProductInventoryOrderJourneyTests(RunningApiFixture fixture)
         using HttpResponseMessage committedStockResponse = await fixture.Client.GetAsync(
             $"/api/v1/inventory/stock-items/{stockItemId}");
         using JsonDocument committedStock = await ReadJsonAsync(committedStockResponse);
-        Assert.Equal(80m, committedStock.RootElement.GetProperty("onHandQuantity").GetDecimal());
+        Assert.Equal(100m, committedStock.RootElement.GetProperty("onHandQuantity").GetDecimal());
         Assert.Equal(0m, committedStock.RootElement.GetProperty("reservedQuantity").GetDecimal());
-        Assert.Equal(80m, committedStock.RootElement.GetProperty("availableQuantity").GetDecimal());
+        Assert.Equal(100m, committedStock.RootElement.GetProperty("availableQuantity").GetDecimal());
 
         using HttpResponseMessage deleteResponse = await fixture.Client.DeleteAsync($"/api/v1/product/products/{productId}");
         Assert.Equal(HttpStatusCode.Conflict, deleteResponse.StatusCode);

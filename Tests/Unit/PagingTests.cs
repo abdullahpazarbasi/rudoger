@@ -1,4 +1,5 @@
 using Rudoger.BuildingBlocks.Application;
+using Rudoger.BuildingBlocks.Domain;
 
 namespace Rudoger.UnitTests;
 
@@ -22,6 +23,10 @@ public sealed class PagingTests
     [InlineData(1, 101)]
     public void NormalizeRejectsInvalidValues(int pageNumber, int pageSize)
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => Paging.Normalize(pageNumber, pageSize));
+        ValidationException exception = Assert.Throws<ValidationException>(
+            () => Paging.Normalize(pageNumber, pageSize));
+
+        Assert.Equal("paging-invalid", exception.Code);
+        Assert.DoesNotContain("Parameter", exception.Message, StringComparison.Ordinal);
     }
 }

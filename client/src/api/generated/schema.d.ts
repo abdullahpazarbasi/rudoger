@@ -29,9 +29,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TokenResult"];
-                        "application/json": components["schemas"]["TokenResult"];
-                        "text/json": components["schemas"]["TokenResult"];
+                        "text/plain": components["schemas"]["TokenResponse"];
+                        "application/json": components["schemas"]["TokenResponse"];
+                        "text/json": components["schemas"]["TokenResponse"];
                     };
                 };
             };
@@ -68,9 +68,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["PageOfStockItemView"];
-                        "application/json": components["schemas"]["PageOfStockItemView"];
-                        "text/json": components["schemas"]["PageOfStockItemView"];
+                        "text/plain": components["schemas"]["PageResponseOfStockItemResponse"];
+                        "application/json": components["schemas"]["PageResponseOfStockItemResponse"];
+                        "text/json": components["schemas"]["PageResponseOfStockItemResponse"];
                     };
                 };
             };
@@ -99,9 +99,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["StockItemView"];
-                        "application/json": components["schemas"]["StockItemView"];
-                        "text/json": components["schemas"]["StockItemView"];
+                        "text/plain": components["schemas"]["StockItemResponse"];
+                        "application/json": components["schemas"]["StockItemResponse"];
+                        "text/json": components["schemas"]["StockItemResponse"];
                     };
                 };
             };
@@ -136,9 +136,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["StockItemView"];
-                        "application/json": components["schemas"]["StockItemView"];
-                        "text/json": components["schemas"]["StockItemView"];
+                        "text/plain": components["schemas"]["StockItemResponse"];
+                        "application/json": components["schemas"]["StockItemResponse"];
+                        "text/json": components["schemas"]["StockItemResponse"];
                     };
                 };
             };
@@ -178,9 +178,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["PageOfStockMovementView"];
-                        "application/json": components["schemas"]["PageOfStockMovementView"];
-                        "text/json": components["schemas"]["PageOfStockMovementView"];
+                        "text/plain": components["schemas"]["PageResponseOfStockMovementResponse"];
+                        "application/json": components["schemas"]["PageResponseOfStockMovementResponse"];
+                        "text/json": components["schemas"]["PageResponseOfStockMovementResponse"];
                     };
                 };
             };
@@ -211,9 +211,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["StockMovementView"];
-                        "application/json": components["schemas"]["StockMovementView"];
-                        "text/json": components["schemas"]["StockMovementView"];
+                        "text/plain": components["schemas"]["StockMovementResponse"];
+                        "application/json": components["schemas"]["StockMovementResponse"];
+                        "text/json": components["schemas"]["StockMovementResponse"];
                     };
                 };
             };
@@ -249,9 +249,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["PageOfOrderView"];
-                        "application/json": components["schemas"]["PageOfOrderView"];
-                        "text/json": components["schemas"]["PageOfOrderView"];
+                        "text/plain": components["schemas"]["PageResponseOfOrderResponse"];
+                        "application/json": components["schemas"]["PageResponseOfOrderResponse"];
+                        "text/json": components["schemas"]["PageResponseOfOrderResponse"];
                     };
                 };
             };
@@ -280,9 +280,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["OrderPlacementView"];
-                        "application/json": components["schemas"]["OrderPlacementView"];
-                        "text/json": components["schemas"]["OrderPlacementView"];
+                        "text/plain": components["schemas"]["OrderPlacementResponse"];
+                        "application/json": components["schemas"]["OrderPlacementResponse"];
+                        "text/json": components["schemas"]["OrderPlacementResponse"];
                     };
                 };
             };
@@ -317,9 +317,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["OrderView"];
-                        "application/json": components["schemas"]["OrderView"];
-                        "text/json": components["schemas"]["OrderView"];
+                        "text/plain": components["schemas"]["OrderResponse"];
+                        "application/json": components["schemas"]["OrderResponse"];
+                        "text/json": components["schemas"]["OrderResponse"];
                     };
                 };
             };
@@ -356,9 +356,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["OrderPlacementView"];
-                        "application/json": components["schemas"]["OrderPlacementView"];
-                        "text/json": components["schemas"]["OrderPlacementView"];
+                        "text/plain": components["schemas"]["OrderPlacementResponse"];
+                        "application/json": components["schemas"]["OrderPlacementResponse"];
+                        "text/json": components["schemas"]["OrderPlacementResponse"];
                     };
                 };
             };
@@ -403,9 +403,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["OrderTransitionView"];
-                        "application/json": components["schemas"]["OrderTransitionView"];
-                        "text/json": components["schemas"]["OrderTransitionView"];
+                        "text/plain": components["schemas"]["OrderTransitionResponse"];
+                        "application/json": components["schemas"]["OrderTransitionResponse"];
+                        "text/json": components["schemas"]["OrderTransitionResponse"];
                     };
                 };
             };
@@ -441,9 +441,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["OrderTransitionView"];
-                        "application/json": components["schemas"]["OrderTransitionView"];
-                        "text/json": components["schemas"]["OrderTransitionView"];
+                        "text/plain": components["schemas"]["OrderTransitionResponse"];
+                        "application/json": components["schemas"]["OrderTransitionResponse"];
+                        "text/json": components["schemas"]["OrderTransitionResponse"];
                     };
                 };
             };
@@ -482,9 +482,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["PageOfProductView"];
-                        "application/json": components["schemas"]["PageOfProductView"];
-                        "text/json": components["schemas"]["PageOfProductView"];
+                        "text/plain": components["schemas"]["PageResponseOfProductResponse"];
+                        "application/json": components["schemas"]["PageResponseOfProductResponse"];
+                        "text/json": components["schemas"]["PageResponseOfProductResponse"];
                     };
                 };
             };
@@ -511,9 +511,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductView"];
-                        "application/json": components["schemas"]["ProductView"];
-                        "text/json": components["schemas"]["ProductView"];
+                        "text/plain": components["schemas"]["ProductResponse"];
+                        "application/json": components["schemas"]["ProductResponse"];
+                        "text/json": components["schemas"]["ProductResponse"];
                     };
                 };
             };
@@ -548,9 +548,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductView"];
-                        "application/json": components["schemas"]["ProductView"];
-                        "text/json": components["schemas"]["ProductView"];
+                        "text/plain": components["schemas"]["ProductResponse"];
+                        "application/json": components["schemas"]["ProductResponse"];
+                        "text/json": components["schemas"]["ProductResponse"];
                     };
                 };
             };
@@ -600,9 +600,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductView"];
-                        "application/json": components["schemas"]["ProductView"];
-                        "text/json": components["schemas"]["ProductView"];
+                        "text/plain": components["schemas"]["ProductResponse"];
+                        "application/json": components["schemas"]["ProductResponse"];
+                        "text/json": components["schemas"]["ProductResponse"];
                     };
                 };
             };
@@ -633,9 +633,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductPackagingView"][];
-                        "application/json": components["schemas"]["ProductPackagingView"][];
-                        "text/json": components["schemas"]["ProductPackagingView"][];
+                        "text/plain": components["schemas"]["ProductPackagingResponse"][];
+                        "application/json": components["schemas"]["ProductPackagingResponse"][];
+                        "text/json": components["schemas"]["ProductPackagingResponse"][];
                     };
                 };
             };
@@ -664,9 +664,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductPackagingView"];
-                        "application/json": components["schemas"]["ProductPackagingView"];
-                        "text/json": components["schemas"]["ProductPackagingView"];
+                        "text/plain": components["schemas"]["ProductPackagingResponse"];
+                        "application/json": components["schemas"]["ProductPackagingResponse"];
+                        "text/json": components["schemas"]["ProductPackagingResponse"];
                     };
                 };
             };
@@ -702,9 +702,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductPackagingView"];
-                        "application/json": components["schemas"]["ProductPackagingView"];
-                        "text/json": components["schemas"]["ProductPackagingView"];
+                        "text/plain": components["schemas"]["ProductPackagingResponse"];
+                        "application/json": components["schemas"]["ProductPackagingResponse"];
+                        "text/json": components["schemas"]["ProductPackagingResponse"];
                     };
                 };
             };
@@ -756,9 +756,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductPackagingView"];
-                        "application/json": components["schemas"]["ProductPackagingView"];
-                        "text/json": components["schemas"]["ProductPackagingView"];
+                        "text/plain": components["schemas"]["ProductPackagingResponse"];
+                        "application/json": components["schemas"]["ProductPackagingResponse"];
+                        "text/json": components["schemas"]["ProductPackagingResponse"];
                     };
                 };
             };
@@ -769,12 +769,51 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * @example {
+         *       "lines": [
+         *         {
+         *           "productId": "00000000-0000-0000-0000-000000000000",
+         *           "uomCode": "CASE",
+         *           "quantity": 2
+         *         }
+         *       ]
+         *     }
+         */
         CreateOrderRequest: {
             lines: components["schemas"]["OrderPlacementLineRequest"][];
         };
+        /**
+         * @example {
+         *       "target": "Shipped"
+         *     }
+         */
         CreateOrderTransitionRequest: {
-            target: components["schemas"]["OrderTransitionTarget"];
+            target: components["schemas"]["OrderTransitionTargetContract"];
         };
+        /**
+         * @example {
+         *       "sku": "COFFEE-001",
+         *       "name": "Coffee",
+         *       "baseUomCode": "EA",
+         *       "basePriceAmount": 2.5,
+         *       "basePriceCurrencyCode": "TRY",
+         *       "packagings": [
+         *         {
+         *           "level": 0,
+         *           "uomCode": "EA",
+         *           "conversionFactor": 1,
+         *           "barcode": "869000000001"
+         *         },
+         *         {
+         *           "level": 1,
+         *           "uomCode": "CASE",
+         *           "conversionFactor": 10,
+         *           "barcode": "869000000010"
+         *         }
+         *       ]
+         *     }
+         */
         CreateProductRequest: {
             sku: string;
             name: string;
@@ -784,14 +823,30 @@ export interface components {
             basePriceCurrencyCode: string;
             packagings: components["schemas"]["ProductPackagingRequest"][];
         };
+        /**
+         * @example {
+         *       "productId": "00000000-0000-0000-0000-000000000000",
+         *       "uomCode": "CASE",
+         *       "openingQuantity": 10
+         *     }
+         */
         CreateStockItemRequest: {
             /** Format: uuid */
             productId: string;
+            uomCode: string;
             /** Format: double */
             openingQuantity: number | string;
         };
+        /**
+         * @example {
+         *       "type": "Receipt",
+         *       "uomCode": "CASE",
+         *       "quantity": 2
+         *     }
+         */
         CreateStockMovementRequest: {
-            type: components["schemas"]["StockMovementType"];
+            type: components["schemas"]["StockMovementTypeContract"];
+            uomCode: string;
             /** Format: double */
             quantity: number | string;
         };
@@ -810,7 +865,7 @@ export interface components {
             op: "remove";
             path: string;
         })[];
-        OrderLineView: {
+        OrderLineResponse: {
             /** Format: uuid */
             id: string;
             /** Format: int32 */
@@ -831,7 +886,7 @@ export interface components {
             /** Format: double */
             quantity: number | string;
         };
-        OrderPlacementLineView: {
+        OrderPlacementLineResponse: {
             /** Format: int32 */
             num: number | string;
             /** Format: uuid */
@@ -840,44 +895,44 @@ export interface components {
             /** Format: double */
             quantity: number | string;
         };
-        OrderPlacementStatus: number;
-        OrderPlacementView: {
+        OrderPlacementResponse: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             orderId: string;
             /** Format: uuid */
             userId: string;
-            status: components["schemas"]["OrderPlacementStatus"];
-            lines: components["schemas"]["OrderPlacementLineView"][];
+            status: components["schemas"]["OrderPlacementStatusContract"];
+            lines: components["schemas"]["OrderPlacementLineResponse"][];
             failureCode: null | string;
             failureDetail: null | string;
         };
-        OrderStatus: number;
-        OrderTransitionStatus: number;
-        OrderTransitionTarget: number;
-        OrderTransitionView: {
+        OrderPlacementStatusContract: number;
+        OrderResponse: {
+            /** Format: uuid */
+            id: string;
+            orderNumber: string;
+            status: components["schemas"]["OrderStatusContract"];
+            /** Format: uuid */
+            userId: string;
+            lines: components["schemas"]["OrderLineResponse"][];
+            /** Format: uuid */
+            pendingTransitionId: null | string;
+            pendingTransitionTarget: null | components["schemas"]["OrderTransitionTargetContract"];
+        };
+        OrderStatusContract: number;
+        OrderTransitionResponse: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             orderId: string;
-            target: components["schemas"]["OrderTransitionTarget"];
-            status: components["schemas"]["OrderTransitionStatus"];
+            target: components["schemas"]["OrderTransitionTargetContract"];
+            status: components["schemas"]["OrderTransitionStatusContract"];
         };
-        OrderView: {
-            /** Format: uuid */
-            id: string;
-            orderNumber: string;
-            status: components["schemas"]["OrderStatus"];
-            /** Format: uuid */
-            userId: string;
-            lines: components["schemas"]["OrderLineView"][];
-            /** Format: uuid */
-            pendingTransitionId: null | string;
-            pendingTransitionTarget: null | components["schemas"]["OrderTransitionTarget"];
-        };
-        PageOfOrderView: {
-            items: components["schemas"]["OrderView"][];
+        OrderTransitionStatusContract: number;
+        OrderTransitionTargetContract: number;
+        PageResponseOfOrderResponse: {
+            items: components["schemas"]["OrderResponse"][];
             /** Format: int32 */
             pageNumber: number | string;
             /** Format: int32 */
@@ -885,8 +940,8 @@ export interface components {
             /** Format: int32 */
             totalCount: number | string;
         };
-        PageOfProductView: {
-            items: components["schemas"]["ProductView"][];
+        PageResponseOfProductResponse: {
+            items: components["schemas"]["ProductResponse"][];
             /** Format: int32 */
             pageNumber: number | string;
             /** Format: int32 */
@@ -894,8 +949,8 @@ export interface components {
             /** Format: int32 */
             totalCount: number | string;
         };
-        PageOfStockItemView: {
-            items: components["schemas"]["StockItemView"][];
+        PageResponseOfStockItemResponse: {
+            items: components["schemas"]["StockItemResponse"][];
             /** Format: int32 */
             pageNumber: number | string;
             /** Format: int32 */
@@ -903,8 +958,8 @@ export interface components {
             /** Format: int32 */
             totalCount: number | string;
         };
-        PageOfStockMovementView: {
-            items: components["schemas"]["StockMovementView"][];
+        PageResponseOfStockMovementResponse: {
+            items: components["schemas"]["StockMovementResponse"][];
             /** Format: int32 */
             pageNumber: number | string;
             /** Format: int32 */
@@ -930,7 +985,7 @@ export interface components {
             /** Format: double */
             heightInMm: null | number | string;
         };
-        ProductPackagingView: {
+        ProductPackagingResponse: {
             /** Format: uuid */
             id: string;
             /** Format: int32 */
@@ -948,7 +1003,7 @@ export interface components {
             /** Format: double */
             heightInMm: null | number | string;
         };
-        ProductView: {
+        ProductResponse: {
             /** Format: uuid */
             id: string;
             sku: string;
@@ -957,9 +1012,9 @@ export interface components {
             /** Format: double */
             basePriceAmount: number | string;
             basePriceCurrencyCode: string;
-            packagings: components["schemas"]["ProductPackagingView"][];
+            packagings: components["schemas"]["ProductPackagingResponse"][];
         };
-        StockItemView: {
+        StockItemResponse: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
@@ -972,13 +1027,15 @@ export interface components {
             /** Format: double */
             availableQuantity: number | string;
         };
-        StockMovementType: number;
-        StockMovementView: {
+        StockMovementResponse: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             stockItemId: string;
-            type: components["schemas"]["StockMovementType"];
+            type: components["schemas"]["StockMovementTypeContract"];
+            uomCode: string;
+            /** Format: double */
+            quantity: number | string;
             /** Format: double */
             onHandQuantityDelta: number | string;
             /** Format: double */
@@ -988,16 +1045,21 @@ export interface components {
             referenceId: null | string;
             idempotencyKey: string;
             correlationId: string;
-            /** Format: uuid */
-            sourceEventId: string;
             /** Format: date-time */
             occurredAtUtc: string;
         };
+        StockMovementTypeContract: number;
+        /**
+         * @example {
+         *       "username": "abdullah",
+         *       "password": "12345678"
+         *     }
+         */
         TokenExchangeRequest: {
             username: string;
             password: string;
         };
-        TokenResult: {
+        TokenResponse: {
             accessToken: string;
             tokenType: string;
             /** Format: int32 */

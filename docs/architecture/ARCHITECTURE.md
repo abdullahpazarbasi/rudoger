@@ -83,7 +83,7 @@ flowchart LR
         audit["3. ApiRequestLoggingMiddleware<br/>Sırları maskeler, başlangıç kaydı yazılamazsa 503<br/>Modules/Logging/Presentation"]
         errors["4. ExceptionHandlingMiddleware + status code pages<br/>RFC 9457 problem details<br/>BuildingBlocks/Presentation"]
         authorization["5. ASP.NET Core yetkilendirme<br/>Product, Inventory, Order için JWT zorunlu<br/>Modules/Authn/Infrastructure"]
-        endpoints["6. REST controller'ları<br/>Modules/{Authn,Product,Inventory,Order}/Presentation"]
+        endpoints["6. REST controller'ları + response sözleşmeleri<br/>Modules/{Authn,Product,Inventory,Order}/Presentation"]
         auth --> correlation --> audit --> errors --> authorization --> endpoints
     end
 
@@ -124,7 +124,9 @@ Ok etiketlerindeki numaralar, çağrıyı başlatan middleware adımını göste
 
 **Sorumluluklar.** `Program.cs`; kimlik doğrulama, korelasyon, zorunlu istek günlüğü, standart hata yanıtları, yetkilendirme, controller'lar, health ve OpenAPI'yi bu sırayla bir araya getirir. Token takası, health ve OpenAPI uç noktaları anonimdir; Product, Inventory ve Order controller'ları JWT yetkilendirmesi ister.
 
-**Veri akışı.** Kimlik doğrulama claim'leri kurar; korelasyon `X-Correlation-Id` değerini türetir veya üretir; günlükleme, uç nokta çalışmadan önce maskelenmiş bir başlangıç kaydı yazar ve sonrasında kaydı tamamlar. Bilinen domain, çakışma, eşzamanlılık, bulunamadı, doğrulama ve kimlik doğrulama hataları `application/problem+json` yanıtlarına dönüşür. Dahili API gateway'leri aynı korelasyon bağlamını kullanır ve `InternalCallLogger` üzerinden `logging.RequestLogs` tablosuna `Internal` kanalıyla yazar.
+**Veri akışı.** Kimlik doğrulama claim'leri kurar; korelasyon `X-Correlation-Id` değerini türetir veya üretir; günlükleme, uç nokta çalışmadan önce maskelenmiş bir başlangıç kaydı yazar ve sonrasında kaydı tamamlar. Bilinen domain, çakışma, eşzamanlılık, bulunamadı, doğrulama ve kimlik doğrulama hataları `application/problem+json` yanıtlarına dönüşür; problem type URI'si her zaman ilgili context'e ait bir failure code ile biter.
+
+Controller'lar Application view model'lerini değil, kendi Presentation response record'larını ve contract enum'larını yayınlar. Böylece OpenAPI sözleşmesi iç model adlarına ve domain enum'larına bağlı kalmaz; `Tests/Unit/PublishedContractTests.cs` bunu doğrular. Dahili API gateway'leri aynı korelasyon bağlamını kullanır ve `InternalCallLogger` üzerinden `logging.RequestLogs` tablosuna `Internal` kanalıyla yazar. Internal kanalın kayıtlarında HTTP durum kodu bulunmaz; sonuç, ilgili context'in yayınladığı failure code ile kaydedilir.
 
 ### 3.2 İş bounded context'leri ve dahili API'ler
 
@@ -181,7 +183,7 @@ Bağlamlar arası oklar, çağıran bağlamın Infrastructure gateway'inden çı
 
 **Sorumluluklar.** Product; katalog, paketleme, fiyat ve geçici kullanım taleplerinin sahibidir. Inventory; temel UoM cinsinden stok bakiyelerinin ve hareketlerinin sahibidir. Order; eşzamansız yerleştirme, fiyat anlık görüntüleri, rezervasyon koordinasyonu ve shipped/cancelled geçişlerinin sahibidir. Her bağlam, Clean Architecture katmanlarını ayrı projelerde korur.
 
-**Veri akışı.** Bağlamlar arası çağrılar yalnızca tüketicinin Infrastructure gateway'inden çıkar ve sağlayıcının Presentation sözleşmesini hedefler. Süreç içi çağrılardır, ancak her bounded context bağımsız commit eder. Ürün silme, Inventory ve Order'a sorar. Inventory, stok açarken veya elle hareket girerken Product'ı talep eder. Order, Product tekliflerini talep eder ve Inventory'ye rezervasyon, commit, release veya telafi komutları verir. Her gateway çağrısı, 3.1'de gösterilen `InternalCallLogger` üzerinden `logging.RequestLogs` tablosuna yazılır.
+**Veri akışı.** Bağlamlar arası çağrılar yalnızca tüketicinin Infrastructure gateway'inden çıkar ve sağlayıcının Presentation sözleşmesini hedefler. Süreç içi çağrılardır, ancak her bounded context bağımsız commit eder. Her gateway aynı zamanda bir anti-corruption layer'dır: sağlayıcının yayınladığı failure code'larını (`ProductApiFailureCode`, `InventoryApiFailureCode`) tüketicinin kendi dağarcığına çevirir, böylece bir context'in hata sözlüğü başka bir context'in API'sından okunamaz. Ürün silme, Inventory ve Order'a sorar. Inventory, stok açarken veya elle hareket girerken Product'ı talep eder. Order, Product tekliflerini talep eder ve Inventory'ye rezervasyon, commit, release veya telafi komutları verir. Her gateway çağrısı, 3.1'de gösterilen `InternalCallLogger` üzerinden `logging.RequestLogs` tablosuna yazılır.
 
 ### 3.3 Event store, projeksiyonlar, outbox'lar ve worker yoklaması
 
@@ -212,9 +214,9 @@ flowchart TB
     class sql data;
 ```
 
-**Sorumluluklar.** Jenerik event store, kararlı event zarflarını serileştirir ve yarışları unique `(StreamId, Version)` kısıtı ile çözer. Repository projector'leri okuma modellerini aynı transaction içinde günceller. Order ve Inventory, yerel transaction'larına outbox satırları ekler ve bunları en az bir kez işler.
+**Sorumluluklar.** Jenerik event store, kararlı event zarflarını serileştirir ve yarışları unique `(StreamId, Version)` kısıtı ile çözer. Event zarfları tek başına yazılır; ardından projector'ler aynı transaction içinde çalışır ve ikinci bir kaydetme ile commit edilir. Bu ayrım sayesinde kaybedilen bir version yarışı `ConcurrencyException`, projeksiyon kısıt hatası ise kendi anlamıyla yüzeye çıkar. Repository projector'leri aggregate kimliğini event store'dan parametre olarak alır. Order ve Inventory, yerel transaction'larına outbox satırları ekler ve bunları en az bir kez işler.
 
-**Veri akışı ve yoklama.** Repository'ler aggregate'i yeniden kurmak için sıralı event'leri yükler; yeni event'leri ve projeksiyonları atomik olarak kaydeder. Her hosted worker, vadesi gelmiş ve kilitsiz tek bir satırı tekrar tekrar kilitleyerek alır. Uygun satır yoksa yeniden yoklamadan önce **500 ms** bekler. Kilit bir dakika sürer; hatalar 60 saniyede sınırlanan üstel yeniden deneme gecikmeleri kullanır. Kaynak event ID'leri ve idempotency anahtarları, tekrarlanan Inventory etkilerini güvenli kılar.
+**Veri akışı ve yoklama.** Repository'ler aggregate'i yeniden kurmak için sıralı event'leri yükler; yeni event'leri ve projeksiyonları atomik olarak kaydeder. Her hosted worker, vadesi gelmiş ve kilitsiz tek bir satırı tekrar tekrar kilitleyerek alır. Uygun satır yoksa yeniden yoklamadan önce **500 ms** bekler. Kilit bir dakika sürer; hatalar 60 saniyede sınırlanan üstel yeniden deneme gecikmeleri kullanır. Operation ID'leri ve idempotency anahtarları, tekrarlanan Inventory etkilerini güvenli kılar.
 
 ## 4. Deployment
 
@@ -276,15 +278,16 @@ sequenceDiagram
     participant ProductDb as product<br/>şeması
     participant Worker as Inventory<br/>OutboxWorker<br/>Modules/Inventory/Infrastructure
 
-    Client->>Inventory: POST /api/v1/inventory/<br/>stock-items<br/>Idempotency-Key başlığı ile
-    Inventory->>InventoryDb: Oluşturma idempotency<br/>anahtarını ve ProductId'yi<br/>sorgula
+    Client->>Inventory: POST /api/v1/inventory/<br/>stock-items<br/>UomCode + OpeningQuantity<br/>Idempotency-Key başlığı ile
+    Inventory->>InventoryDb: Oluşturma idempotency<br/>anahtarını, ProductId, UoM ve<br/>girilen miktarı sorgula
     alt Aynı girdiyle mevcut anahtar
         Inventory-->>Client: 201, özgün StockItem
     else Yeni istek
-        Inventory->>Product: ClaimOffer(usage = INVENTORY, operationId)
+        Inventory->>Product: ClaimOffer(usage = INVENTORY,<br/>operationId, UoM kodu)
         Product->>ProductDb: ProductUsageClaimed ekle<br/>+ talebi projekte et
         Note over Product,ProductDb: Tek Product transaction'ı
-        Product-->>Inventory: BaseUomCode
+        Product-->>Inventory: BaseUomCode + ConversionFactor
+        Inventory->>Inventory: Girilen miktarı base UoM'ye çevir
         Inventory->>InventoryDb: StockItemOpened ve varsa<br/>StockReceived ekle, projeksiyonu yaz,<br/>serbest bırakma outbox mesajı ekle
         Note over Inventory,InventoryDb: Tek Inventory transaction'ı
         Inventory-->>Client: 201 StockItem
@@ -302,9 +305,9 @@ sequenceDiagram
     end
 ```
 
-**Sorumluluklar.** Inventory, kanonik temel UoM'yi alıp kendi stok durumunu commit ederken silinmeyi önlemek için Product'ı geçici olarak talep eder. Yerel Inventory transaction'ı, bu talebi serbest bırakmak için gereken outbox işini de oluşturur.
+**Sorumluluklar.** Inventory, seçilen paketleme UoM'sini Product'a doğrulatır, çağrıdan dönen dönüşüm katsayısını anlık görüntü olarak kullanıp miktarı base UoM'ye çevirir ve kendi stok durumunu commit ederken ürünün silinmesini önlemek için Product'ı geçici olarak talep eder. Yerel Inventory transaction'ı, bu talebi serbest bırakmak için gereken outbox işini de oluşturur. Bakiye ve delta'lar base UoM cinsindedir; denetim ve idempotency için istemcinin girdiği UoM ile miktar ayrıca hareket projeksiyonunda korunur.
 
-**Veri akışı ve yoklama.** `Idempotency-Key`, stok oluşturmayı tekrarlanabilir kılar. Inventory worker'ı outbox'ını 500 ms boşta bekleme ile yoklar, Product dahili API'sini süreç içinde çağırır ve mesajı işaretler veya yeniden zamanlar. Elle giriş, düzeltme ve düşüm hareketleri de aynı Product talebi serbest bırakma desenini kullanır.
+**Veri akışı ve yoklama.** `Idempotency-Key`, normalize edilmiş UoM kodu ve istemcinin girdiği miktarla birlikte stok oluşturmayı tekrarlanabilir kılar; böylece sonraki packaging değişiklikleri bir retry'ın kimliğini değiştirmez. Inventory worker'ı outbox'ını 500 ms boşta bekleme ile yoklar, Product dahili API'sini süreç içinde çağırır ve mesajı işaretler veya yeniden zamanlar. Elle giriş, düzeltme ve düşüm hareketleri de aynı UoM dönüşümü ve Product talebini serbest bırakma desenini kullanır.
 
 ### 5.2 Siparişi eşzamansız yerleştirme
 
@@ -346,18 +349,18 @@ sequenceDiagram
         end
         Worker->>Worker: Tek para birimini doğrula,<br/>temel miktarları ve fiyat<br/>anlık görüntülerini hesapla
         loop Her farklı Product için
-            Worker->>Inventory: Reserve(temel miktar, orderId, sourceEventId)
+            Worker->>Inventory: Reserve(temel miktar, orderId, operationId)
             Inventory->>InventoryDb: StockReserved ekle<br/>+ bakiyeleri güncelle
         end
         alt İş kuralları başarılı
             Worker->>OrderDb: OrderPlaced ekle<br/>+ Order/OrderLines projeksiyonu
             Worker->>OrderDb: OrderPlacementSucceeded ekle<br/>+ Succeeded projeksiyonu
-        else Domain, çakışma veya bulunamadı hatası
+        else Gateway ACL'inin Order diline çevirdiği iş hatası
             loop Her Product grubu için
-                Worker->>Inventory: CompensateReservation(orderId, releaseSourceEventId)
+                Worker->>Inventory: CompensateReservation(orderId, releaseOperationId)
                 Inventory->>InventoryDb: Rezervasyon varsa<br/>idempotent olarak serbest bırak
             end
-            Worker->>OrderDb: OrderPlacementFailed ekle<br/>+ hata ayrıntıları
+            Worker->>OrderDb: OrderPlacementFailed ekle<br/>+ Order'a ait failure code
         else Altyapı veya beklenmeyen hata
             Worker->>Worker: Temizlik sonrası<br/>hatayı yukarı ilet
         end
@@ -409,10 +412,10 @@ sequenceDiagram
         alt Tüm Inventory çağrıları başarılı
             loop Siparişteki her farklı Product için
                 alt hedef = Shipped
-                    Worker->>Inventory: Commit(productId, orderId, sourceEventId)
+                    Worker->>Inventory: Commit(productId, orderId, operationId)
                     Inventory->>InventoryDb: StockCommitted ekle<br/>OnHand -= miktar<br/>Reserved -= miktar
                 else hedef = Cancelled
-                    Worker->>Inventory: Release(productId, orderId, sourceEventId)
+                    Worker->>Inventory: Release(productId, orderId, operationId)
                     Inventory->>InventoryDb: StockReleased ekle<br/>Reserved -= miktar
                 end
             end
@@ -480,10 +483,12 @@ sequenceDiagram
 ## Birincil uygulama kanıtları
 
 - Kompozisyon ve middleware sırası: `Host/Rudoger.Api/Program.cs`
+- OpenAPI bearer şeması, operasyon başına güvenlik gereksinimi ve request örnekleri: `Host/Rudoger.Api/BearerSecuritySchemeTransformer.cs`, `Host/Rudoger.Api/BearerSecurityRequirementTransformer.cs`, `Host/Rudoger.Api/RequestExampleSchemaTransformer.cs`
 - Konteyner topolojisi ve sağlık yoklaması: `compose.yaml`, `Dockerfile`, `docker/swagger-ui/default.conf.template`
 - Katman ve bounded context bağımlılık kuralları: `Tests/Architecture/ModuleDependencyTests.cs` ve tüm proje referansları
+- Yayınlanan sözleşmenin iç modeli sızdırmadığı: `Tests/Unit/PublishedContractTests.cs`, `Tests/EndToEnd/PublishedVocabularyTests.cs`
 - Event transaction'ları ve eşzamanlılık: `BuildingBlocks/Infrastructure/EventStore.cs`
-- Dahili API gateway'leri: `Modules/{Product,Inventory,Order}/Infrastructure/*Gateway.cs`
+- Dahili API gateway'leri ve anti-corruption layer: `Modules/{Product,Inventory,Order}/Infrastructure/*Gateway.cs`, `Modules/Order/Infrastructure/OrderGatewayFailure.cs`, `Modules/Inventory/Infrastructure/InventoryGatewayFailure.cs`
 - Eşzamansız iş akışları ve yoklama: `Modules/Order/Infrastructure/OrderOutboxWorker.cs`, `Modules/Inventory/Infrastructure/InventoryOutboxWorker.cs`
 - Sipariş orkestrasyonu: `Modules/Order/Application/OrderWorkflowService.cs`
 - Veritabanı sahipliği: `Modules/*/Infrastructure` altındaki beş `*DbContext.cs` dosyası

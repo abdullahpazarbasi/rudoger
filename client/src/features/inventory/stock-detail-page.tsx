@@ -1,10 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import {
   createStockMovement,
+  getProduct,
   getStockItem,
   listStockMovements,
 } from "../../api/client/rudoger-api";
@@ -27,6 +28,7 @@ import { useAuth } from "../authn/use-auth";
 type ManualMovementType = Extract<StockMovementType, "Receipt" | "Adjustment" | "Deduction">;
 interface MovementDraft {
   type: ManualMovementType;
+  uomCode: string;
   quantity: string;
 }
 
@@ -36,7 +38,9 @@ export function StockDetailPage() {
   const [params, setParams] = useSearchParams();
   const pageNumber = Math.max(1, Number(params.get("sayfa")) || 1);
   const [intent] = useState(() => new IdempotencyIntent("stock-movement"));
-  const form = useForm<MovementDraft>({ defaultValues: { type: "Receipt", quantity: "" } });
+  const form = useForm<MovementDraft>({
+    defaultValues: { type: "Receipt", uomCode: "", quantity: "" },
+  });
   const itemQuery = useQuery({
     queryKey: queryKeys.stockItem(stockItemId),
     queryFn: ({ signal }) => getStockItem(stockItemId, signal),
@@ -47,20 +51,43 @@ export function StockDetailPage() {
     queryFn: ({ signal }) => listStockMovements(stockItemId, pageNumber, signal),
     enabled: auth.status === "authenticated" && stockItemId !== "",
   });
+  const productQuery = useQuery({
+    queryKey: queryKeys.product(itemQuery.data?.productId ?? ""),
+    queryFn: ({ signal }) => getProduct(itemQuery.data?.productId ?? "", signal),
+    enabled: auth.status === "authenticated" && itemQuery.data !== undefined,
+  });
+  useEffect(() => {
+    if (form.getValues("uomCode") === "" && productQuery.data !== undefined) {
+      form.setValue("uomCode", productQuery.data.baseUomCode);
+    }
+  }, [form, productQuery.data]);
   const mutation = useMutation({
-    mutationFn: ({ type, quantity }: { type: ManualMovementType; quantity: number }) =>
+    mutationFn: ({
+      type,
+      uomCode,
+      quantity,
+    }: {
+      type: ManualMovementType;
+      uomCode: string;
+      quantity: number;
+    }) =>
       createStockMovement(
         stockItemId,
         type,
+        uomCode,
         quantity,
-        intent.keyFor({ stockItemId, type, quantity }),
+        intent.keyFor({ stockItemId, type, uomCode, quantity }),
       ),
     onError(error) {
       applyServerFieldErrors(error, form.setError);
     },
     async onSuccess() {
       intent.reset();
-      form.reset();
+      form.reset({
+        type: "Receipt",
+        uomCode: productQuery.data?.baseUomCode ?? "",
+        quantity: "",
+      });
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.stockItem(stockItemId) }),
         queryClient.invalidateQueries({ queryKey: ["stock-movements", stockItemId] }),
@@ -70,6 +97,10 @@ export function StockDetailPage() {
     },
   });
   const submit = (draft: MovementDraft): void => {
+    if (draft.uomCode === "") {
+      form.setError("uomCode", { message: "UoM seçin." });
+      return;
+    }
     const quantity = Number(draft.quantity);
     const valid =
       Number.isFinite(quantity) && (draft.type === "Adjustment" ? quantity !== 0 : quantity > 0);
@@ -82,7 +113,7 @@ export function StockDetailPage() {
       });
       return;
     }
-    mutation.mutate({ type: draft.type, quantity });
+    mutation.mutate({ type: draft.type, uomCode: draft.uomCode, quantity });
   };
   if (itemQuery.isPending && auth.status === "authenticated") return <p>Stok kaydı yükleniyor…</p>;
   if (itemQuery.isError) return <ErrorPanel error={itemQuery.error} />;
@@ -130,6 +161,11 @@ export function StockDetailPage() {
                 <ErrorPanel compact error={mutation.error} />
               </div>
             )}
+            {productQuery.isError && (
+              <div className="mt-4">
+                <ErrorPanel compact error={productQuery.error} />
+              </div>
+            )}
             <form
               className="mt-4 grid gap-4"
               onSubmit={(event) => void form.handleSubmit(submit)(event)}
@@ -139,6 +175,18 @@ export function StockDetailPage() {
                 <option value="Adjustment">Düzeltme</option>
                 <option value="Deduction">Düşüm</option>
               </SelectField>
+              <SelectField
+                error={form.formState.errors.uomCode?.message}
+                label="UoM"
+                {...form.register("uomCode")}
+              >
+                <option value="">UoM seçin</option>
+                {productQuery.data?.packagings.map((packaging) => (
+                  <option key={packaging.id} value={packaging.uomCode}>
+                    {packaging.uomCode} (×{formatNumber(packaging.conversionFactor)})
+                  </option>
+                ))}
+              </SelectField>
               <TextField
                 error={form.formState.errors.quantity?.message}
                 label="Miktar"
@@ -146,7 +194,10 @@ export function StockDetailPage() {
                 type="number"
                 {...form.register("quantity")}
               />
-              <Button disabled={auth.status === "expired" || mutation.isPending} type="submit">
+              <Button
+                disabled={auth.status === "expired" || mutation.isPending || productQuery.isPending}
+                type="submit"
+              >
                 {mutation.isPending ? "İşleniyor…" : "Hareketi İşle"}
               </Button>
             </form>
@@ -168,6 +219,7 @@ export function StockDetailPage() {
                     <tr>
                       <th>Zaman</th>
                       <th>Tür</th>
+                      <th>Girilen miktar</th>
                       <th>Eldeki Δ</th>
                       <th>Rezerve Δ</th>
                       <th>Kaynak</th>
@@ -180,6 +232,9 @@ export function StockDetailPage() {
                           {formatDateTime(movement.occurredAtUtc)}
                         </td>
                         <td>{movementTypeLabels[movement.type]}</td>
+                        <td>
+                          {formatNumber(movement.quantity)} {movement.uomCode}
+                        </td>
                         <td>{formatNumber(movement.onHandQuantityDelta)}</td>
                         <td>{formatNumber(movement.reservedQuantityDelta)}</td>
                         <td className="text-sm">
@@ -195,7 +250,7 @@ export function StockDetailPage() {
                     ))}
                     {movementsQuery.data.items.length === 0 && (
                       <tr>
-                        <td className="text-center text-[var(--muted)]" colSpan={5}>
+                        <td className="text-center text-[var(--muted)]" colSpan={6}>
                           Hareket bulunamadı.
                         </td>
                       </tr>

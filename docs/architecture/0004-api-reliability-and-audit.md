@@ -1,8 +1,5 @@
 # ADR 0004: Idempotency, korelasyon, problem details ve zorunlu denetim günlükleri
 
-- Durum: Kabul edildi
-- Tarih: 2026-09-16
-
 ## Karar
 
 Yeniden denenebilen komutlar `Idempotency-Key` kabul eder. Tekrarlanan bir anahtar, yalnızca istek anlamı eşleştiğinde özgün sonucu döndürür; farklı girdiyle yeniden kullanım HTTP 409 döndürür. Tüm genel ve dahili operasyonlar `X-Correlation-Id` değerini yayar. Geçersiz veya eksik gelen değerler bir GUID v7 dizesiyle değiştirilir.

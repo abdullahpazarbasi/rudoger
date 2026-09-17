@@ -244,6 +244,7 @@ export async function getStockItem(stockItemId: string, signal?: AbortSignal): P
 
 export async function createStockItem(
   productId: string,
+  uomCode: string,
   openingQuantity: number,
   idempotencyKey: string,
 ): Promise<StockItem> {
@@ -251,7 +252,7 @@ export async function createStockItem(
     () =>
       apiClient.POST("/api/v1/inventory/stock-items", {
         params: { header: { "Idempotency-Key": idempotencyKey } },
-        body: { productId, openingQuantity },
+        body: { productId, uomCode, openingQuantity },
       }),
     stockItemSchema,
   );
@@ -269,6 +270,7 @@ const movementTypeNumbers: Record<
 export async function createStockMovement(
   stockItemId: string,
   type: Extract<StockMovementType, "Receipt" | "Adjustment" | "Deduction">,
+  uomCode: string,
   quantity: number,
   idempotencyKey: string,
 ): Promise<StockMovement> {
@@ -279,7 +281,7 @@ export async function createStockMovement(
           path: { stockItemId },
           header: { "Idempotency-Key": idempotencyKey },
         },
-        body: { type: movementTypeNumbers[type], quantity },
+        body: { type: movementTypeNumbers[type], uomCode, quantity },
       }),
     stockMovementSchema,
   );

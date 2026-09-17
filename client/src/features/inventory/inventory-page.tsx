@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo, useState, type ChangeEvent } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { createStockItem, listProducts, listStockItems } from "../../api/client/rudoger-api";
@@ -19,6 +19,7 @@ import { useAuth } from "../authn/use-auth";
 
 interface StockDraft {
   productId: string;
+  uomCode: string;
   openingQuantity: string;
 }
 
@@ -31,7 +32,10 @@ function CreateStockDialog({
 }) {
   const auth = useAuth();
   const navigate = useNavigate();
-  const form = useForm<StockDraft>({ defaultValues: { productId: "", openingQuantity: "0" } });
+  const form = useForm<StockDraft>({
+    defaultValues: { productId: "", uomCode: "", openingQuantity: "0" },
+  });
+  const selectedProductId = useWatch({ control: form.control, name: "productId" });
   const intent = useMemo(() => new IdempotencyIntent("stock-open"), []);
   const products = useQuery({
     queryKey: queryKeys.products({ pageNumber: 1, pageSize: 100 }),
@@ -39,8 +43,21 @@ function CreateStockDialog({
     enabled: open && auth.status === "authenticated",
   });
   const mutation = useMutation({
-    mutationFn: ({ productId, openingQuantity }: { productId: string; openingQuantity: number }) =>
-      createStockItem(productId, openingQuantity, intent.keyFor({ productId, openingQuantity })),
+    mutationFn: ({
+      productId,
+      uomCode,
+      openingQuantity,
+    }: {
+      productId: string;
+      uomCode: string;
+      openingQuantity: number;
+    }) =>
+      createStockItem(
+        productId,
+        uomCode,
+        openingQuantity,
+        intent.keyFor({ productId, uomCode, openingQuantity }),
+      ),
     onError(error) {
       applyServerFieldErrors(error, form.setError);
     },
@@ -56,11 +73,22 @@ function CreateStockDialog({
     form.clearErrors();
     const quantity = Number(draft.openingQuantity);
     if (draft.productId === "") form.setError("productId", { message: "Ürün seçin." });
+    if (draft.uomCode === "") form.setError("uomCode", { message: "UoM seçin." });
     if (!Number.isFinite(quantity) || quantity < 0)
       form.setError("openingQuantity", { message: "Açılış miktarı sıfır veya pozitif olmalıdır." });
-    if (draft.productId !== "" && Number.isFinite(quantity) && quantity >= 0)
-      mutation.mutate({ productId: draft.productId, openingQuantity: quantity });
+    if (
+      draft.productId !== "" &&
+      draft.uomCode !== "" &&
+      Number.isFinite(quantity) &&
+      quantity >= 0
+    )
+      mutation.mutate({
+        productId: draft.productId,
+        uomCode: draft.uomCode,
+        openingQuantity: quantity,
+      });
   };
+  const selectedProduct = products.data?.items.find((product) => product.id === selectedProductId);
   return (
     <Dialog
       description="Her ürün için tek stok kaydı açılabilir."
@@ -82,12 +110,29 @@ function CreateStockDialog({
         <SelectField
           error={form.formState.errors.productId?.message}
           label="Ürün"
-          {...form.register("productId")}
+          {...form.register("productId", {
+            onChange(event: ChangeEvent<HTMLSelectElement>) {
+              const product = products.data?.items.find((item) => item.id === event.target.value);
+              form.setValue("uomCode", product?.baseUomCode ?? "");
+            },
+          })}
         >
           <option value="">Ürün seçin</option>
           {products.data?.items.map((product) => (
             <option key={product.id} value={product.id}>
               {product.sku} — {product.name}
+            </option>
+          ))}
+        </SelectField>
+        <SelectField
+          error={form.formState.errors.uomCode?.message}
+          label="UoM"
+          {...form.register("uomCode")}
+        >
+          <option value="">UoM seçin</option>
+          {selectedProduct?.packagings.map((packaging) => (
+            <option key={packaging.id} value={packaging.uomCode}>
+              {packaging.uomCode} (×{formatNumber(packaging.conversionFactor)})
             </option>
           ))}
         </SelectField>

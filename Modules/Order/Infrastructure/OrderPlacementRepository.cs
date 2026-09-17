@@ -13,7 +13,6 @@ public sealed class OrderPlacementRepository(
 {
     private const string AggregateType = "order-placement";
 
-    private Guid CurrentStreamId { get; set; }
 
     public async Task<OrderPlacementAggregate?> LoadAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -30,7 +29,6 @@ public sealed class OrderPlacementRepository(
 
     public Task SaveAsync(OrderPlacementAggregate aggregate, CancellationToken cancellationToken)
     {
-        CurrentStreamId = aggregate.Id;
         return eventStore.AppendAsync(AggregateType, aggregate, ProjectAsync, cancellationToken);
     }
 
@@ -52,13 +50,13 @@ public sealed class OrderPlacementRepository(
         return entity is null ? null : ToView(entity);
     }
 
-    private Task ProjectAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
+    private Task ProjectAsync(Guid aggregateId, IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         return domainEvent switch
         {
             OrderPlacementRequested requested => ProjectRequestedAsync(requested, cancellationToken),
-            OrderPlacementSucceeded => ProjectSucceededAsync(cancellationToken),
-            OrderPlacementFailed failed => ProjectFailedAsync(failed, cancellationToken),
+            OrderPlacementSucceeded => ProjectSucceededAsync(aggregateId, cancellationToken),
+            OrderPlacementFailed failed => ProjectFailedAsync(aggregateId, failed, cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported order placement event '{domainEvent.GetType().Name}'."),
         };
     }
@@ -81,8 +79,8 @@ public sealed class OrderPlacementRepository(
                 ProductId = line.ProductId,
                 UomCode = line.UomCode,
                 Quantity = line.Quantity,
-                ReservationSourceEventId = line.ReservationSourceEventId,
-                ReleaseSourceEventId = line.ReleaseSourceEventId,
+                ReservationOperationId = line.ReservationOperationId,
+                ReleaseOperationId = line.ReleaseOperationId,
             }).ToList(),
         });
         DateTimeOffset now = timeProvider.GetUtcNow();
@@ -97,18 +95,21 @@ public sealed class OrderPlacementRepository(
         return Task.CompletedTask;
     }
 
-    private async Task ProjectSucceededAsync(CancellationToken cancellationToken)
+    private async Task ProjectSucceededAsync(Guid aggregateId, CancellationToken cancellationToken)
     {
         OrderPlacementReadEntity placement = await dbContext.OrderPlacements.SingleAsync(
-            item => item.Id == CurrentStreamId,
+            item => item.Id == aggregateId,
             cancellationToken);
         placement.Status = OrderPlacementStatus.Succeeded;
     }
 
-    private async Task ProjectFailedAsync(OrderPlacementFailed failed, CancellationToken cancellationToken)
+    private async Task ProjectFailedAsync(
+        Guid aggregateId,
+        OrderPlacementFailed failed,
+        CancellationToken cancellationToken)
     {
         OrderPlacementReadEntity placement = await dbContext.OrderPlacements.SingleAsync(
-            item => item.Id == CurrentStreamId,
+            item => item.Id == aggregateId,
             cancellationToken);
         placement.Status = OrderPlacementStatus.Failed;
         placement.FailureCode = failed.FailureCode;

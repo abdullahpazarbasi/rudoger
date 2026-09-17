@@ -8,4 +8,6 @@ public sealed record StockItemOpened(
     string BaseUomCode,
     decimal OpeningQuantity,
     string IdempotencyKey,
-    Guid ProductUsageOperationId) : IDomainEvent;
+    Guid ProductUsageOperationId,
+    string OpeningUomCode,
+    decimal RequestedOpeningQuantity) : IDomainEvent;

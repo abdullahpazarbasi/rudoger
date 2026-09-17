@@ -26,11 +26,7 @@ public sealed class AuthnRepository(AuthnDbContext dbContext, EventStore<AuthnDb
 
     public Task SaveAsync(UserAggregate aggregate, CancellationToken cancellationToken)
     {
-        return eventStore.AppendAsync(
-            AggregateType,
-            aggregate,
-            (domainEvent, token) => ProjectAsync(aggregate.Id, domainEvent, token),
-            cancellationToken);
+        return eventStore.AppendAsync(AggregateType, aggregate, ProjectAsync, cancellationToken);
     }
 
     public async Task<UserCredential?> GetByUsernameAsync(string username, CancellationToken cancellationToken)
@@ -40,10 +36,10 @@ public sealed class AuthnRepository(AuthnDbContext dbContext, EventStore<AuthnDb
         return entity is null ? null : new UserCredential(entity.Id, entity.Username, entity.PasswordHash);
     }
 
-    private Task ProjectAsync(Guid streamId, IDomainEvent domainEvent, CancellationToken cancellationToken)
+    private Task ProjectAsync(Guid aggregateId, IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (domainEvent is not UserRegistered registered || registered.UserId != streamId)
+        if (domainEvent is not UserRegistered registered || registered.UserId != aggregateId)
         {
             throw new InvalidOperationException($"Unsupported authn event '{domainEvent.GetType().Name}'.");
         }

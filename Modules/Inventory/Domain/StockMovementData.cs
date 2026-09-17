@@ -8,4 +8,6 @@ public sealed record StockMovementData(
     Guid? ReferenceId,
     string IdempotencyKey,
     string CorrelationId,
-    Guid SourceEventId);
+    Guid OperationId,
+    string UomCode,
+    decimal Quantity);

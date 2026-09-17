@@ -1,3 +1,5 @@
+using Rudoger.BuildingBlocks.Domain;
+
 namespace Rudoger.BuildingBlocks.Application;
 
 public static class Paging
@@ -13,12 +15,14 @@ public static class Paging
 
         if (number < 1)
         {
-            throw new ArgumentOutOfRangeException(nameof(pageNumber), "Page number must be at least one.");
+            throw new ValidationException("paging-invalid", "Page number must be at least one.");
         }
 
         if (size is < 1 or > MaximumPageSize)
         {
-            throw new ArgumentOutOfRangeException(nameof(pageSize), $"Page size must be between one and {MaximumPageSize}.");
+            throw new ValidationException(
+                "paging-invalid",
+                $"Page size must be between one and {MaximumPageSize}.");
         }
 
         return (number, size);

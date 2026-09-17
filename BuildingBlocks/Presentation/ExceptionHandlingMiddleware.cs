@@ -18,7 +18,7 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         {
             await next(context);
         }
-        catch (Exception exception) when (exception is DomainException or ConflictException or ConcurrencyException or KeyNotFoundException or ArgumentException or UnauthorizedAccessException)
+        catch (Exception exception) when (exception is DomainException or ConflictException or ConcurrencyException or NotFoundException or ValidationException or UnauthorizedAccessException)
         {
             await WriteKnownProblemAsync(context, correlationContextAccessor.Current.CorrelationId, exception);
         }
@@ -67,12 +67,19 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
                 "A concurrency conflict occurred.",
                 exception.Message,
                 correlationId),
-            KeyNotFoundException => WriteProblemAsync(
+            NotFoundException notFound => WriteProblemAsync(
                 context,
                 StatusCodes.Status404NotFound,
-                "https://rudoger.dev/problems/resource-not-found",
+                $"https://rudoger.dev/problems/{notFound.Code}",
                 "The requested resource was not found.",
-                exception.Message,
+                notFound.Message,
+                correlationId),
+            ValidationException validation => WriteProblemAsync(
+                context,
+                StatusCodes.Status400BadRequest,
+                $"https://rudoger.dev/problems/{validation.Code}",
+                "The request is invalid.",
+                validation.Message,
                 correlationId),
             _ => WriteProblemAsync(
                 context,

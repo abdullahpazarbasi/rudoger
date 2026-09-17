@@ -104,8 +104,8 @@ public sealed class OrderPlacementAggregate : AggregateRoot
         {
             if (line.Id == Guid.Empty
                 || line.ProductId == Guid.Empty
-                || line.ReservationSourceEventId == Guid.Empty
-                || line.ReleaseSourceEventId == Guid.Empty
+                || line.ReservationOperationId == Guid.Empty
+                || line.ReleaseOperationId == Guid.Empty
                 || line.Num < 1)
             {
                 throw new DomainException("order-line-identity-invalid", "Order placement line identities are invalid.");

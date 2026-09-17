@@ -94,4 +94,8 @@
   <Folder Name="/Tests/Unit/">
     <Project Path="Tests/Unit/Rudoger.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/Tools/" />
+  <Folder Name="/Tools/DatabaseDump/">
+    <Project Path="Tools/DatabaseDump/Rudoger.DatabaseDump.csproj" />
+  </Folder>
 </Solution>

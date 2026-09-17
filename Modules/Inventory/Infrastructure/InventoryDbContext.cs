@@ -25,7 +25,11 @@ public sealed class InventoryDbContext(DbContextOptions<InventoryDbContext> opti
             builder.Property(item => item.CreationIdempotencyKey)
                 .HasMaxLength(InventoryRules.IdempotencyKeyMaximumLength)
                 .IsRequired();
+            builder.Property(item => item.OpeningUomCode)
+                .HasMaxLength(InventoryRules.UomCodeMaximumLength)
+                .IsRequired();
             builder.Property(item => item.OpeningQuantity).HasPrecision(19, 6);
+            builder.Property(item => item.RequestedOpeningQuantity).HasPrecision(19, 6);
             builder.Property(item => item.OnHandQuantity).HasPrecision(19, 6);
             builder.Property(item => item.ReservedQuantity).HasPrecision(19, 6);
             builder.HasIndex(item => item.ProductId).IsUnique();
@@ -37,6 +41,8 @@ public sealed class InventoryDbContext(DbContextOptions<InventoryDbContext> opti
             builder.ToTable("StockMovements");
             builder.HasKey(item => item.Id);
             builder.Property(item => item.Type).HasConversion<string>().HasMaxLength(20).IsRequired();
+            builder.Property(item => item.UomCode).HasMaxLength(InventoryRules.UomCodeMaximumLength).IsRequired();
+            builder.Property(item => item.Quantity).HasPrecision(19, 6);
             builder.Property(item => item.OnHandQuantityDelta).HasPrecision(19, 6);
             builder.Property(item => item.ReservedQuantityDelta).HasPrecision(19, 6);
             builder.Property(item => item.ReferenceType).HasMaxLength(InventoryRules.ReferenceTypeMaximumLength).IsRequired();
@@ -44,7 +50,9 @@ public sealed class InventoryDbContext(DbContextOptions<InventoryDbContext> opti
             builder.Property(item => item.CorrelationId).HasMaxLength(InventoryRules.CorrelationIdMaximumLength).IsRequired();
             builder.Property(item => item.OccurredAtUtc).HasPrecision(7);
             builder.HasIndex(item => item.IdempotencyKey).IsUnique();
-            builder.HasIndex(item => item.SourceEventId).IsUnique();
+            // AGENTS.md pins the persisted StockMovement field name, so only the CLR name changes.
+            builder.Property(item => item.OperationId).HasColumnName("SourceEventId");
+            builder.HasIndex(item => item.OperationId).IsUnique();
             builder.HasIndex(item => new { item.ReferenceType, item.ReferenceId });
             builder.HasOne<StockItemReadEntity>()
                 .WithMany()

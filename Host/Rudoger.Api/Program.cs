@@ -59,7 +59,12 @@ public sealed partial class Program
         builder.Services.AddSingleton<ICorrelationContextAccessor, CorrelationContextAccessor>();
         builder.Services.AddSingleton<EventTypeRegistry>(RudogerEventTypeRegistry.Create());
         builder.Services.AddProblemDetails();
-        builder.Services.AddOpenApi("v1");
+        builder.Services.AddOpenApi("v1", options =>
+        {
+            options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+            options.AddOperationTransformer<BearerSecurityRequirementTransformer>();
+            options.AddSchemaTransformer<RequestExampleSchemaTransformer>();
+        });
         builder.Services.AddHealthChecks()
             .AddCheck<DatabaseHealthCheck>("database");
         builder.Services.AddControllers()

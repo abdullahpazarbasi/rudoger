@@ -1,8 +1,5 @@
 # ADR 0001: Süreç içi dahili API'lere sahip modüler monolit
 
-- Durum: Kabul edildi
-- Tarih: 2026-09-16
-
 ## Bağlam
 
 Authn, Product, Inventory, Order ve Logging birbirinden bağımsız dil ve sahiplik sınırlarına sahiptir. Assignment, bounded context'lerin API'ler üzerinden haberleşmesini isterken aynı dağıtılabilir birim içindeki çağrılarda HTTP kullanılmasından kaçınılmasını gerektirir.

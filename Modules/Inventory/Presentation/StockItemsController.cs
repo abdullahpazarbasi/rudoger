@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rudoger.BuildingBlocks.Application;
+using Rudoger.BuildingBlocks.Presentation;
 using Rudoger.Modules.Inventory.Application;
 
 namespace Rudoger.Modules.Inventory.Presentation;
@@ -11,54 +12,67 @@ namespace Rudoger.Modules.Inventory.Presentation;
 public sealed class StockItemsController(InventoryApplicationService service) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<StockItemView>> CreateAsync(
+    public async Task<ActionResult<StockItemResponse>> CreateAsync(
         CreateStockItemRequest request,
         [FromHeader(Name = "Idempotency-Key")] string idempotencyKey,
         CancellationToken cancellationToken)
     {
         StockItemView item = await service.CreateAsync(
-            new CreateStockItemCommand(request.ProductId, request.OpeningQuantity, idempotencyKey),
+            new CreateStockItemCommand(request.ProductId, request.UomCode, request.OpeningQuantity, idempotencyKey),
             cancellationToken);
-        return Created($"/api/v1/inventory/stock-items/{item.Id}", item);
+        return Created($"/api/v1/inventory/stock-items/{item.Id}", StockItemResponse.From(item));
     }
 
     [HttpGet]
-    public async Task<ActionResult<Page<StockItemView>>> ListAsync(
+    public async Task<ActionResult<PageResponse<StockItemResponse>>> ListAsync(
         [FromQuery] Guid? productId,
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize,
         CancellationToken cancellationToken)
     {
-        return Ok(await service.ListAsync(productId, pageNumber, pageSize, cancellationToken));
+        Page<StockItemView> page = await service.ListAsync(productId, pageNumber, pageSize, cancellationToken);
+        return Ok(PageResponseFactory.From(page, StockItemResponse.From));
     }
 
     [HttpGet("{stockItemId:guid}")]
-    public async Task<ActionResult<StockItemView>> GetAsync(Guid stockItemId, CancellationToken cancellationToken)
+    public async Task<ActionResult<StockItemResponse>> GetAsync(Guid stockItemId, CancellationToken cancellationToken)
     {
-        return Ok(await service.GetAsync(stockItemId, cancellationToken));
+        return Ok(StockItemResponse.From(await service.GetAsync(stockItemId, cancellationToken)));
     }
 
     [HttpPost("{stockItemId:guid}/movements")]
-    public async Task<ActionResult<StockMovementView>> MoveAsync(
+    public async Task<ActionResult<StockMovementResponse>> MoveAsync(
         Guid stockItemId,
         CreateStockMovementRequest request,
         [FromHeader(Name = "Idempotency-Key")] string idempotencyKey,
         CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(request);
         StockMovementView movement = await service.MoveAsync(
             stockItemId,
-            new CreateStockMovementCommand(request.Type, request.Quantity, idempotencyKey),
+            new CreateStockMovementCommand(
+                request.ToMovementType(),
+                request.UomCode,
+                request.Quantity,
+                idempotencyKey),
             cancellationToken);
-        return Created($"/api/v1/inventory/stock-items/{stockItemId}/movements", movement);
+        return Created(
+            $"/api/v1/inventory/stock-items/{stockItemId}/movements",
+            StockMovementResponse.From(movement));
     }
 
     [HttpGet("{stockItemId:guid}/movements")]
-    public async Task<ActionResult<Page<StockMovementView>>> ListMovementsAsync(
+    public async Task<ActionResult<PageResponse<StockMovementResponse>>> ListMovementsAsync(
         Guid stockItemId,
         [FromQuery] int? pageNumber,
         [FromQuery] int? pageSize,
         CancellationToken cancellationToken)
     {
-        return Ok(await service.ListMovementsAsync(stockItemId, pageNumber, pageSize, cancellationToken));
+        Page<StockMovementView> page = await service.ListMovementsAsync(
+            stockItemId,
+            pageNumber,
+            pageSize,
+            cancellationToken);
+        return Ok(PageResponseFactory.From(page, StockMovementResponse.From));
     }
 }

@@ -1,4 +1,5 @@
 using Rudoger.BuildingBlocks.Application;
+using Rudoger.BuildingBlocks.Domain;
 using Rudoger.Modules.Logging.Application;
 using Rudoger.Modules.Logging.Domain;
 
@@ -8,6 +9,8 @@ public sealed class InternalCallLogger(
     IRequestLogStore store,
     ICorrelationContextAccessor correlationContextAccessor) : IInternalCallLogger
 {
+    private const string UnexpectedFailureCode = "internal-call-failed";
+
     public async Task<T> ExecuteAsync<T>(
         string operation,
         Func<CancellationToken, Task<T>> action,
@@ -18,14 +21,14 @@ public sealed class InternalCallLogger(
         try
         {
             T result = await action(cancellationToken);
-            await store.CompleteAsync(id, new RequestLogCompletion(200, "SUCCEEDED", null), cancellationToken);
+            await store.CompleteAsync(id, new RequestLogCompletion(null, "SUCCEEDED", null), cancellationToken);
             return result;
         }
         catch (Exception exception)
         {
             await store.CompleteAsync(
                 id,
-                new RequestLogCompletion(500, "FAILED", exception.GetType().FullName),
+                new RequestLogCompletion(null, "FAILED", FailureCodeOf(exception)),
                 CancellationToken.None);
             throw;
         }
@@ -44,6 +47,20 @@ public sealed class InternalCallLogger(
                 return true;
             },
             cancellationToken);
+    }
+
+    // The audit record carries the failure code the raising context published, never a CLR type name:
+    // an implementation type has no place in a field that otherwise holds a problem identifier.
+    private static string FailureCodeOf(Exception exception)
+    {
+        return exception switch
+        {
+            DomainException domain => domain.Code,
+            ConflictException conflict => conflict.Code,
+            NotFoundException notFound => notFound.Code,
+            ValidationException validation => validation.Code,
+            _ => UnexpectedFailureCode,
+        };
     }
 
     private Task<Guid> StartAsync(string operation, CancellationToken cancellationToken)

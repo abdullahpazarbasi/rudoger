@@ -5,14 +5,21 @@ namespace Rudoger.Modules.Authn.Infrastructure;
 
 public sealed class PasswordService(IPasswordHasher<string> passwordHasher) : IPasswordService
 {
-    public string Hash(string username, string password)
+    // The hasher derives a per-hash random salt and ignores this argument, so the identity it wants
+    // stays an implementation detail instead of leaking into the application contract.
+    private const string HashSubject = "";
+
+    public string Hash(string password)
     {
-        return passwordHasher.HashPassword(username, password);
+        return passwordHasher.HashPassword(HashSubject, password);
     }
 
-    public bool Verify(string username, string passwordHash, string suppliedPassword)
+    public bool Verify(string passwordHash, string suppliedPassword)
     {
-        PasswordVerificationResult result = passwordHasher.VerifyHashedPassword(username, passwordHash, suppliedPassword);
+        PasswordVerificationResult result = passwordHasher.VerifyHashedPassword(
+            HashSubject,
+            passwordHash,
+            suppliedPassword);
         return result is PasswordVerificationResult.Success or PasswordVerificationResult.SuccessRehashNeeded;
     }
 }

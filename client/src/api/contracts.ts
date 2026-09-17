@@ -50,13 +50,14 @@ export const stockMovementSchema = z.object({
   id: z.uuid(),
   stockItemId: z.uuid(),
   type: stockMovementTypeSchema,
+  uomCode: z.string(),
+  quantity: decimalSchema,
   onHandQuantityDelta: decimalSchema,
   reservedQuantityDelta: decimalSchema,
   referenceType: z.string(),
   referenceId: z.uuid().nullable(),
   idempotencyKey: z.string(),
   correlationId: z.string(),
-  sourceEventId: z.uuid(),
   occurredAtUtc: z.string(),
 });
 

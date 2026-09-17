@@ -27,7 +27,6 @@ public sealed class ProductRepository(ProductDbContext dbContext, EventStore<Pro
 
     public Task SaveAsync(ProductAggregate aggregate, CancellationToken cancellationToken)
     {
-        CurrentStreamId = aggregate.Id;
         return eventStore.AppendAsync(AggregateType, aggregate, ProjectAsync, cancellationToken);
     }
 
@@ -78,18 +77,18 @@ public sealed class ProductRepository(ProductDbContext dbContext, EventStore<Pro
             cancellationToken);
     }
 
-    private Task ProjectAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
+    private Task ProjectAsync(Guid aggregateId, IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         return domainEvent switch
         {
             ProductCreated created => ProjectCreatedAsync(created, cancellationToken),
-            ProductChanged changed => ProjectChangedAsync(changed, cancellationToken),
-            ProductPackagingAdded added => ProjectPackagingAddedAsync(added, cancellationToken),
+            ProductChanged changed => ProjectChangedAsync(aggregateId, changed, cancellationToken),
+            ProductPackagingAdded added => ProjectPackagingAddedAsync(aggregateId, added, cancellationToken),
             ProductPackagingChanged changed => ProjectPackagingChangedAsync(changed, cancellationToken),
             ProductPackagingRemoved removed => ProjectPackagingRemovedAsync(removed, cancellationToken),
-            ProductUsageClaimed claimed => ProjectUsageClaimedAsync(claimed),
-            ProductUsageReleased released => ProjectUsageReleasedAsync(released, cancellationToken),
-            ProductDeleted => ProjectDeletedAsync(cancellationToken),
+            ProductUsageClaimed claimed => ProjectUsageClaimedAsync(aggregateId, claimed),
+            ProductUsageReleased released => ProjectUsageReleasedAsync(aggregateId, released, cancellationToken),
+            ProductDeleted => ProjectDeletedAsync(aggregateId, cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported product event '{domainEvent.GetType().Name}'."),
         };
     }
@@ -109,20 +108,26 @@ public sealed class ProductRepository(ProductDbContext dbContext, EventStore<Pro
         return Task.CompletedTask;
     }
 
-    private async Task ProjectChangedAsync(ProductChanged changed, CancellationToken cancellationToken)
+    private async Task ProjectChangedAsync(
+        Guid aggregateId,
+        ProductChanged changed,
+        CancellationToken cancellationToken)
     {
-        ProductReadEntity product = await FindProductAsync(cancellationToken);
+        ProductReadEntity product = await FindProductAsync(aggregateId, cancellationToken);
         product.Sku = changed.Sku;
         product.Name = changed.Name;
         product.BasePriceAmount = changed.BasePriceAmount;
         product.BasePriceCurrencyCode = changed.BasePriceCurrencyCode;
     }
 
-    private Task ProjectPackagingAddedAsync(ProductPackagingAdded added, CancellationToken cancellationToken)
+    private Task ProjectPackagingAddedAsync(
+        Guid aggregateId,
+        ProductPackagingAdded added,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ProductPackagingReadEntity entity = ToEntity(added.Packaging);
-        entity.ProductId = CurrentStreamId;
+        entity.ProductId = aggregateId;
         dbContext.ProductPackagings.Add(entity);
         return Task.CompletedTask;
     }
@@ -143,21 +148,24 @@ public sealed class ProductRepository(ProductDbContext dbContext, EventStore<Pro
         dbContext.ProductPackagings.Remove(entity);
     }
 
-    private Task ProjectUsageClaimedAsync(ProductUsageClaimed claimed)
+    private Task ProjectUsageClaimedAsync(Guid aggregateId, ProductUsageClaimed claimed)
     {
         dbContext.ProductUsageClaims.Add(new ProductUsageClaimEntity
         {
-            ProductId = CurrentStreamId,
+            ProductId = aggregateId,
             OperationId = claimed.OperationId,
             UsageType = claimed.UsageType,
         });
         return Task.CompletedTask;
     }
 
-    private async Task ProjectUsageReleasedAsync(ProductUsageReleased released, CancellationToken cancellationToken)
+    private async Task ProjectUsageReleasedAsync(
+        Guid aggregateId,
+        ProductUsageReleased released,
+        CancellationToken cancellationToken)
     {
         ProductUsageClaimEntity? entity = await dbContext.ProductUsageClaims.SingleOrDefaultAsync(
-            item => item.ProductId == CurrentStreamId && item.OperationId == released.OperationId,
+            item => item.ProductId == aggregateId && item.OperationId == released.OperationId,
             cancellationToken);
         if (entity is not null)
         {
@@ -165,17 +173,16 @@ public sealed class ProductRepository(ProductDbContext dbContext, EventStore<Pro
         }
     }
 
-    private async Task ProjectDeletedAsync(CancellationToken cancellationToken)
+    private async Task ProjectDeletedAsync(Guid aggregateId, CancellationToken cancellationToken)
     {
-        ProductReadEntity product = await FindProductAsync(cancellationToken);
+        ProductReadEntity product = await FindProductAsync(aggregateId, cancellationToken);
         product.IsDeleted = true;
     }
 
-    private Guid CurrentStreamId { get; set; }
 
-    private async Task<ProductReadEntity> FindProductAsync(CancellationToken cancellationToken)
+    private async Task<ProductReadEntity> FindProductAsync(Guid aggregateId, CancellationToken cancellationToken)
     {
-        return await dbContext.Products.SingleAsync(item => item.Id == CurrentStreamId, cancellationToken);
+        return await dbContext.Products.SingleAsync(item => item.Id == aggregateId, cancellationToken);
     }
 
     private static ProductPackagingReadEntity ToEntity(PackagingDefinition definition)

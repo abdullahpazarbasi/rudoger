@@ -1,3 +1,7 @@
 namespace Rudoger.Modules.Inventory.Application;
 
-public sealed record CreateStockItemCommand(Guid ProductId, decimal OpeningQuantity, string IdempotencyKey);
+public sealed record CreateStockItemCommand(
+    Guid ProductId,
+    string UomCode,
+    decimal OpeningQuantity,
+    string IdempotencyKey);

@@ -1,7 +1,15 @@
 #!/usr/bin/env pwsh
 
+param(
+    [string] $DatabaseName = ""
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+if ($DatabaseName.Contains(";")) {
+    throw "Database name cannot contain a semicolon."
+}
 
 function Read-DotEnvFile {
     param([Parameter(Mandatory)][string] $Path)
@@ -85,6 +93,7 @@ if (-not [int]::TryParse($mssqlPort, [ref] $parsedPort) -or $parsedPort -lt 1 -o
 
 $segments = $connectionString.Split(@([char] ";"), [StringSplitOptions]::None)
 $serverFound = $false
+$databaseFound = $false
 for ($index = 0; $index -lt $segments.Length; $index++) {
     $separator = $segments[$index].IndexOf("=")
     if ($separator -le 0) {
@@ -96,11 +105,20 @@ for ($index = 0; $index -lt $segments.Length; $index++) {
         $key.Equals("Data Source", [StringComparison]::OrdinalIgnoreCase)) {
         $segments[$index] = "Server=localhost,$parsedPort"
         $serverFound = $true
+    } elseif ($key.Equals("Database", [StringComparison]::OrdinalIgnoreCase) -or
+        $key.Equals("Initial Catalog", [StringComparison]::OrdinalIgnoreCase)) {
+        if (-not [string]::IsNullOrWhiteSpace($DatabaseName)) {
+            $segments[$index] = "Database=$DatabaseName"
+        }
+        $databaseFound = $true
     }
 }
 
 if (-not $serverFound) {
     throw "ConnectionStrings__Rudoger does not contain a Server or Data Source entry."
+}
+if (-not [string]::IsNullOrWhiteSpace($DatabaseName) -and -not $databaseFound) {
+    throw "ConnectionStrings__Rudoger does not contain a Database or Initial Catalog entry."
 }
 
 Write-Output ($segments -join ";")

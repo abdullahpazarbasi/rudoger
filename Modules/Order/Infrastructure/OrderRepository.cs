@@ -14,7 +14,6 @@ public sealed class OrderRepository(
 {
     private const string AggregateType = "order";
 
-    private Guid CurrentStreamId { get; set; }
 
     public async Task<OrderAggregate?> LoadAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -31,7 +30,6 @@ public sealed class OrderRepository(
 
     public Task SaveAsync(OrderAggregate aggregate, CancellationToken cancellationToken)
     {
-        CurrentStreamId = aggregate.Id;
         return eventStore.AppendAsync(AggregateType, aggregate, ProjectAsync, cancellationToken);
     }
 
@@ -69,14 +67,14 @@ public sealed class OrderRepository(
         return entity is null ? null : new OrderTransitionView(entity.Id, entity.OrderId, entity.Target, entity.Status);
     }
 
-    private Task ProjectAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
+    private Task ProjectAsync(Guid aggregateId, IDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         return domainEvent switch
         {
             OrderPlaced placed => ProjectPlacedAsync(placed, cancellationToken),
-            OrderTransitionRequested requested => ProjectTransitionRequestedAsync(requested, cancellationToken),
-            OrderShipped shipped => ProjectTransitionCompletedAsync(shipped.TransitionId, OrderStatus.Shipped, cancellationToken),
-            OrderCancelled cancelled => ProjectTransitionCompletedAsync(cancelled.TransitionId, OrderStatus.Cancelled, cancellationToken),
+            OrderTransitionRequested requested => ProjectTransitionRequestedAsync(aggregateId, requested, cancellationToken),
+            OrderShipped shipped => ProjectTransitionCompletedAsync(aggregateId, shipped.TransitionId, OrderStatus.Shipped, cancellationToken),
+            OrderCancelled cancelled => ProjectTransitionCompletedAsync(aggregateId, cancelled.TransitionId, OrderStatus.Cancelled, cancellationToken),
             _ => throw new InvalidOperationException($"Unsupported order event '{domainEvent.GetType().Name}'."),
         };
     }
@@ -96,28 +94,30 @@ public sealed class OrderRepository(
     }
 
     private async Task ProjectTransitionRequestedAsync(
+        Guid aggregateId,
         OrderTransitionRequested requested,
         CancellationToken cancellationToken)
     {
-        OrderReadEntity order = await dbContext.Orders.SingleAsync(item => item.Id == CurrentStreamId, cancellationToken);
+        OrderReadEntity order = await dbContext.Orders.SingleAsync(item => item.Id == aggregateId, cancellationToken);
         order.PendingTransitionId = requested.TransitionId;
         order.PendingTransitionTarget = requested.Target;
         dbContext.OrderTransitions.Add(new OrderTransitionReadEntity
         {
             Id = requested.TransitionId,
-            OrderId = CurrentStreamId,
+            OrderId = aggregateId,
             Target = requested.Target,
             Status = OrderTransitionStatus.Pending,
         });
-        AddOutbox(OrderWorkflowMessageType.ProcessTransition, CurrentStreamId, requested.TransitionId);
+        AddOutbox(OrderWorkflowMessageType.ProcessTransition, aggregateId, requested.TransitionId);
     }
 
     private async Task ProjectTransitionCompletedAsync(
+        Guid aggregateId,
         Guid transitionId,
         OrderStatus status,
         CancellationToken cancellationToken)
     {
-        OrderReadEntity order = await dbContext.Orders.SingleAsync(item => item.Id == CurrentStreamId, cancellationToken);
+        OrderReadEntity order = await dbContext.Orders.SingleAsync(item => item.Id == aggregateId, cancellationToken);
         OrderTransitionReadEntity transition = await dbContext.OrderTransitions.SingleAsync(
             item => item.Id == transitionId,
             cancellationToken);

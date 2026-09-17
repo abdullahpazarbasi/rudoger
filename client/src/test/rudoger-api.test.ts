@@ -70,13 +70,14 @@ const movement = {
   id: id(4),
   stockItemId: id(3),
   type: "Receipt",
+  uomCode: "CASE",
+  quantity: "2",
   onHandQuantityDelta: "5",
   reservedQuantityDelta: "0",
   referenceType: "MANUAL",
   referenceId: null,
   idempotencyKey: "key",
   correlationId: "corr",
-  sourceEventId: id(5),
   occurredAtUtc: "2026-01-01T00:00:00Z",
 };
 const order = {
@@ -206,8 +207,8 @@ describe("Rudoger API anti-corruption boundary", () => {
     });
     await patchPackaging(id(1), id(2), [{ op: "replace", path: "/barcode", value: "X" }]);
     await deletePackaging(id(1), id(2));
-    await createStockItem(id(1), 5, "stock-key");
-    await createStockMovement(id(3), "Adjustment", -2, "movement-key");
+    await createStockItem(id(1), "CASE", 5, "stock-key");
+    await createStockMovement(id(3), "Adjustment", "CASE", -2, "movement-key");
     await createOrder({ lines: [{ productId: id(1), uomCode: "EA", quantity: 2 }] }, "order-key");
     await createOrderTransition(id(6), "Cancelled");
     const movementCall = clientMock.POST.mock.calls.find((call) =>
@@ -215,7 +216,7 @@ describe("Rudoger API anti-corruption boundary", () => {
     );
     expect(movementCall?.[1]).toMatchObject({
       params: { header: { "Idempotency-Key": "movement-key" } },
-      body: { type: 1, quantity: -2 },
+      body: { type: 1, uomCode: "CASE", quantity: -2 },
     });
     const transitionCall = clientMock.POST.mock.calls.find((call) =>
       call[0].toString().endsWith("/transitions"),

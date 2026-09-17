@@ -10,9 +10,11 @@
 
 ## Proje Ekleri
 
-- [**DICTIONARY.md**](./DICTIONARY.md) : Ubiquitous language için güncel tutulması gereken sözlüktür.
+- [**docs/DICTIONARY.md**](./docs/DICTIONARY.md) : Ubiquitous language için güncel tutulması gereken sözlüktür.
 - [**docs/architecture/ARCHITECTURE.md**](./docs/architecture/ARCHITECTURE.md) : Proje mimarisini diyagramlarla açıklar.
-- [**README.md**](./README.md) : Projeyi değerlendirecek otorite için güncel tutulması gereken yol göstericidir.
+- [**README.md**](./README.md) : Projeyi değerlendirecek otorite için güncel tutulması gereken yol göstericidir. Kısa ve yönlendirici kalmalıdır; operasyonel ayrıntılar aşağıdaki belgelere taşınır.
+- [**docs/DATABASE.md**](./docs/DATABASE.md) : Migration/seed yaşam döngüsü, host bağlantı dizesi, dump ve geri yükleme adımları.
+- [**docs/DEVELOPMENT.md**](./docs/DEVELOPMENT.md) : Yapılandırma önceliği, host SDK ile çalıştırma, tam doğrulama tarifi ve CI adımları.
 
 ## Uygulama Özellikleri
 
@@ -83,6 +85,8 @@ StockMovement:
 - Id
 - StockItemId
 - Type
+- UomCode
+- Quantity
 - OnHandQuantityDelta
 - ReservedQuantityDelta
 - ReferenceType
@@ -207,7 +211,7 @@ Bir istemci BC'nin infrastructure'ındaki bir gateway istemcisinden bir sunucu B
 ## Geliştirme Kuralları
 
 - Stage'e almak ve commit'lemek yasak
-- Senin (agent) kullanıcın ile iletişimin Türkçe olmalı. `README.md` ve `docs/` altındaki belgeler de Türkçe yazılır (kod tanımlayıcıları, yollar ve uç nokta adları İngilizce kalır). Diğer her şey (kod, yorumlar, commit mesajları, testler, yapılandırma) İngilizce
+- Senin (agent) kullanıcın ile iletişimin Türkçe olmalı. `README.md`, `client/README.md` ve `docs/` altındaki belgeler Türkçe yazılır. `docs/DICTIONARY.md` içindeki kavram adları İngilizce, açıklamalar Türkçe yazılır (kod tanımlayıcıları, yollar ve uç nokta adları İngilizce kalır). Diğer her şey (kod, yorumlar, commit mesajları, testler, yapılandırma) İngilizce
 - **Definition of Done:**
   - Her davranış değişikliği uygun `automated test` ile kapsanır
   - Mimari, sızmalara karşı teftiş ve tamir edilir

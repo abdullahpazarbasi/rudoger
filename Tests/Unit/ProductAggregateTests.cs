@@ -177,8 +177,8 @@ public sealed class ProductAggregateTests
         added = product.Packagings.Single(item => item.Level == 2);
 
         Assert.Equal("PAL", added.UomCode);
-        Assert.Throws<KeyNotFoundException>(() => product.ChangePackaging(Packaging(2, "PAL", 120)));
-        Assert.Throws<KeyNotFoundException>(() => product.RemovePackaging(Guid.CreateVersion7()));
+        Assert.Throws<NotFoundException>(() => product.ChangePackaging(Packaging(2, "PAL", 120)));
+        Assert.Throws<NotFoundException>(() => product.RemovePackaging(Guid.CreateVersion7()));
         Assert.Throws<DomainException>(() => product.AddPackaging(Packaging(1, "OTHER", 2)));
         Assert.Throws<DomainException>(() => product.AddPackaging(Packaging(3, "PAL", 2)));
 

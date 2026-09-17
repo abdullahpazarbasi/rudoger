@@ -12,7 +12,9 @@ public sealed class OrderWorkflowService(
     public async Task ProcessPlacementAsync(Guid placementId, CancellationToken cancellationToken)
     {
         OrderPlacementAggregate placement = await placementRepository.LoadAsync(placementId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Order placement '{placementId}' was not found.");
+            ?? throw new NotFoundException(
+                "order-placement-not-found",
+                $"Order placement '{placementId}' was not found.");
         if (placement.Status != OrderPlacementStatus.Pending)
         {
             await ReleaseAllProductUsageAsync(placement, cancellationToken);
@@ -49,7 +51,7 @@ public sealed class OrderWorkflowService(
                     group.Key,
                     baseQuantity,
                     placement.OrderId,
-                    group.First().ReservationSourceEventId,
+                    group.First().ReservationOperationId,
                     cancellationToken);
             }
 
@@ -73,7 +75,7 @@ public sealed class OrderWorkflowService(
                 await inventoryGateway.CompensateReservationAsync(
                     group.Key,
                     placement.OrderId,
-                    group.First().ReleaseSourceEventId,
+                    group.First().ReleaseOperationId,
                     cancellationToken);
             }
 
@@ -93,7 +95,7 @@ public sealed class OrderWorkflowService(
     public async Task ProcessTransitionAsync(Guid orderId, Guid transitionId, CancellationToken cancellationToken)
     {
         OrderAggregate order = await orderRepository.LoadAsync(orderId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Order '{orderId}' was not found.");
+            ?? throw new NotFoundException("order-not-found", $"Order '{orderId}' was not found.");
         if (order.ActiveTransitionId != transitionId || !order.ActiveTransitionTarget.HasValue)
         {
             return;
@@ -106,7 +108,7 @@ public sealed class OrderWorkflowService(
                 await inventoryGateway.CommitAsync(
                     operation.ProductId,
                     order.Id,
-                    operation.SourceEventId,
+                    operation.OperationId,
                     cancellationToken);
             }
             else
@@ -114,7 +116,7 @@ public sealed class OrderWorkflowService(
                 await inventoryGateway.ReleaseAsync(
                     operation.ProductId,
                     order.Id,
-                    operation.SourceEventId,
+                    operation.OperationId,
                     cancellationToken);
             }
         }
@@ -145,9 +147,11 @@ public sealed class OrderWorkflowService(
         }
     }
 
+    // The gateways translate every product and inventory failure into the order vocabulary, so the
+    // codes and details recorded here - and published by the order API - are always order-owned.
     private static bool IsBusinessFailure(Exception exception)
     {
-        return exception is DomainException or ConflictException or KeyNotFoundException;
+        return exception is DomainException or ConflictException;
     }
 
     private static (string Code, string Detail) GetFailure(Exception exception)
@@ -156,7 +160,6 @@ public sealed class OrderWorkflowService(
         {
             DomainException domain => (domain.Code, domain.Message),
             ConflictException conflict => (conflict.Code, conflict.Message),
-            KeyNotFoundException => ("resource-not-found", exception.Message),
             _ => throw new InvalidOperationException("The exception is not a business failure.", exception),
         };
     }

@@ -2,6 +2,29 @@
 set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+database_name=""
+
+while (($# > 0)); do
+  case "$1" in
+    --database)
+      if (($# < 2)) || [[ -z "$2" ]]; then
+        echo "--database requires a value." >&2
+        exit 1
+      fi
+      database_name="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ "$database_name" == *";"* ]]; then
+  echo "Database name cannot contain a semicolon." >&2
+  exit 1
+fi
 
 read_dotenv_value() {
   local target_key="$1"
@@ -76,6 +99,7 @@ fi
 IFS=';' read -r -a segments <<< "$connection_string"
 host_segments=()
 server_found=false
+database_found=false
 
 for segment in "${segments[@]}"; do
   key="${segment%%=*}"
@@ -86,6 +110,13 @@ for segment in "${segments[@]}"; do
   if [[ "$key" == "server" || "$key" == "data source" ]]; then
     host_segments+=("Server=localhost,$mssql_port")
     server_found=true
+  elif [[ "$key" == "database" || "$key" == "initial catalog" ]]; then
+    if [[ -n "$database_name" ]]; then
+      host_segments+=("Database=$database_name")
+    else
+      host_segments+=("$segment")
+    fi
+    database_found=true
   else
     host_segments+=("$segment")
   fi
@@ -93,6 +124,10 @@ done
 
 if [[ "$server_found" != true ]]; then
   echo "ConnectionStrings__Rudoger does not contain a Server or Data Source entry." >&2
+  exit 1
+fi
+if [[ -n "$database_name" && "$database_found" != true ]]; then
+  echo "ConnectionStrings__Rudoger does not contain a Database or Initial Catalog entry." >&2
   exit 1
 fi
 

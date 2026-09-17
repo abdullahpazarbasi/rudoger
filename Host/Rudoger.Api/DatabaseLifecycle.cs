@@ -23,6 +23,10 @@ public static class DatabaseLifecycle
     public static async Task SeedAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
         await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
-        await scope.ServiceProvider.GetRequiredService<AuthnApplicationService>().SeedAsync(cancellationToken);
+        AuthnApplicationService authn = scope.ServiceProvider.GetRequiredService<AuthnApplicationService>();
+        foreach ((string username, string password) in SeedUsers.Default)
+        {
+            await authn.EnsureUserAsync(username, password, cancellationToken);
+        }
     }
 }
